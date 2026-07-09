@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scan History - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <div class="history-container">
+    <h1>Scan History</h1>
+    <p class="subtitle">Previous file analysis reports</p>
+
+    <% if (scans.length === 0) { %>
+      <div class="card">
+        <p>No scan history found.</p>
+      </div>
+    <% } else { %>
+
+      <table>
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>File Name</th>
+            <th>File Size</th>
+            <th>Scan Result</th>
+            <th>Risk Level</th>
+            <th>Scanned At</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% scans.forEach((scan, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= scan.original_name %></td>
+              <td><%= (scan.file_size / 1024).toFixed(2) %> KB</td>
+              <td><%= scan.scan_result %></td>
+
+              <td>
+                <% if (scan.risk_level === "High") { %>
+                  <span class="badge high">High</span>
+                <% } else if (scan.risk_level === "Medium") { %>
+                  <span class="badge medium">Medium</span>
+                <% } else { %>
+                  <span class="badge low">Low</span>
+                <% } %>
+              </td>
+
+              <td>
+                <%= new Date(scan.scanned_at).toLocaleString() %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+    <% } %>
+
+    <div class="button-area">
+      <a class="btn" href="/dashboard">Back to Dashboard</a>
+      <a class="btn danger" href="/logout">Logout</a>
+    </div>
+
+  </div>
+
+</body>
+</html>

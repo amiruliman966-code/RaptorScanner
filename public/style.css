@@ -1,0 +1,633 @@
+/* ===== BASIC PAGE ===== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  color: #111827;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  height: 65px;
+  background: #3b6ff5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 60px;
+}
+
+.logo {
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+.theme-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* ===== LOGIN / REGISTER ===== */
+.auth-page {
+  min-height: calc(100vh - 65px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-card {
+  width: 420px;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+}
+
+.auth-card h1 {
+  color: #1e3a8a;
+}
+
+.auth-card input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.auth-card button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.auth-card button[type="submit"]:hover {
+  background: #3b6ff5;
+}
+
+.auth-card a {
+  color: #1e3a8a;
+  text-decoration: none;
+}
+
+/* ===== DASHBOARD / NORMAL CONTAINER ===== */
+.container {
+  width: 500px;
+  margin: 80px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+}
+
+.container h1 {
+  color: #1e3a8a;
+}
+
+/* ===== RESULT PAGE ===== */
+.result-container,
+.history-container {
+  width: 80%;
+  max-width: 900px;
+  margin: 50px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+}
+
+.card {
+  background: #f9fafb;
+  padding: 18px;
+  margin: 18px 0;
+  border-radius: 10px;
+  border-left: 5px solid #1e3a8a;
+}
+
+.hash {
+  background: #e5e7eb;
+  padding: 10px;
+  border-radius: 6px;
+  word-break: break-all;
+  font-family: monospace;
+}
+
+/* ===== RISK COLORS ===== */
+.risk-low,
+.badge.low {
+  background: #dcfce7;
+  color: #166534;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.risk-medium,
+.badge.medium {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.risk-high,
+.badge.high {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+/* ===== TABLE ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #1e3a8a;
+  color: white;
+  padding: 12px;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* ===== BUTTON LINKS ===== */
+.btn {
+  display: inline-block;
+  padding: 10px 15px;
+  margin: 5px;
+  background: #1e3a8a;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.btn.danger {
+  background: #991b1b;
+}
+
+/* ===== MESSAGE ===== */
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.success {
+  background: #dcfce7;
+  color: #166534;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+/* ===== DARK MODE ===== */
+body.dark-mode {
+  background: #111827;
+  color: white;
+}
+
+body.dark-mode .auth-card,
+body.dark-mode .container,
+body.dark-mode .result-container,
+body.dark-mode .history-container {
+  background: #1f2937;
+  color: white;
+}
+
+body.dark-mode input {
+  background: #374151;
+  color: white;
+  border: 1px solid #6b7280;
+}
+
+body.dark-mode input::placeholder {
+  color: #d1d5db;
+}
+
+body.dark-mode .card {
+  background: #374151;
+}
+
+body.dark-mode .hash {
+  background: #111827;
+  color: white;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0 20px;
+  }
+
+  .logo {
+    font-size: 22px;
+  }
+
+  .nav-links {
+    gap: 15px;
+  }
+
+  .nav-links a {
+    font-size: 14px;
+  }
+
+  .auth-card,
+  .container {
+    width: 90%;
+  }
+
+  .result-container,
+  .history-container {
+    width: 95%;
+  }
+}
+
+/* ===== FIX DASHBOARD PAGE ===== */
+.dashboard-page {
+  min-height: calc(100vh - 65px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.dashboard-card {
+  width: 520px;
+  background: white;
+  padding: 35px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-card h1 {
+  color: #1e3a8a;
+  margin-bottom: 15px;
+}
+
+.welcome-text {
+  font-size: 17px;
+}
+
+.upload-form {
+  margin-top: 25px;
+}
+
+.upload-form input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.upload-form button {
+  width: 100%;
+  padding: 12px;
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.upload-form button:hover {
+  background: #3b6ff5;
+}
+
+.history-link {
+  display: inline-block;
+  margin-top: 20px;
+  color: #1e3a8a;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.history-link:hover {
+  text-decoration: underline;
+}
+
+/* Dark mode dashboard */
+body.dark-mode .dashboard-card {
+  background: #1f2937;
+  color: white;
+}
+
+body.dark-mode .dashboard-card h1 {
+  color: #93c5fd;
+}
+
+body.dark-mode .upload-form input[type="file"] {
+  background: #374151;
+  color: white;
+  border: 1px solid #6b7280;
+}
+
+body.dark-mode .history-link {
+  color: #93c5fd;
+}
+
+/* ===== FIX HOME PAGE ===== */
+.home-hero {
+  min-height: 520px;
+  background: linear-gradient(135deg, #1e3a8a, #3b6ff5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.home-hero-box {
+  max-width: 850px;
+  color: white;
+}
+
+.home-hero-box h1 {
+  font-size: 48px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.home-hero-box p {
+  font-size: 18px;
+  line-height: 1.7;
+  margin-bottom: 30px;
+}
+
+.home-btn {
+  display: inline-block;
+  background: white;
+  color: #1e3a8a;
+  padding: 13px 25px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.home-btn:hover {
+  background: #e5e7eb;
+}
+
+.home-about,
+.home-features {
+  width: 85%;
+  max-width: 1100px;
+  margin: 50px auto;
+  background: white;
+  color: #111827;
+  padding: 35px;
+  border-radius: 14px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+}
+
+.home-about h2,
+.home-features h2 {
+  text-align: center;
+  color: #1e3a8a;
+  margin-bottom: 20px;
+}
+
+.home-about p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #374151;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-top: 25px;
+}
+
+.feature-box {
+  background: #f9fafb;
+  padding: 25px;
+  border-radius: 12px;
+  border-top: 5px solid #1e3a8a;
+}
+
+.feature-box h3 {
+  color: #1e3a8a;
+  margin-top: 0;
+}
+
+.feature-box p {
+  color: #374151;
+  line-height: 1.5;
+}
+
+.home-footer {
+  text-align: center;
+  background: #1e3a8a;
+  color: white;
+  padding: 22px;
+  margin-top: 50px;
+}
+
+/* Dark mode homepage */
+body.dark-mode .home-about,
+body.dark-mode .home-features {
+  background: #1f2937;
+  color: white;
+}
+
+body.dark-mode .home-about p,
+body.dark-mode .feature-box p {
+  color: #d1d5db;
+}
+
+body.dark-mode .feature-box {
+  background: #374151;
+}
+
+body.dark-mode .home-about h2,
+body.dark-mode .home-features h2,
+body.dark-mode .feature-box h3 {
+  color: #93c5fd;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .home-hero-box h1 {
+    font-size: 34px;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== VIRUSTOTAL STYLE DASHBOARD ===== */
+.vt-page {
+  min-height: calc(100vh - 65px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 20px;
+}
+
+.vt-card {
+  width: 850px;
+  max-width: 95%;
+  padding: 35px;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.vt-tabs {
+  display: flex;
+  justify-content: space-around;
+  border-bottom: 1px solid #374151;
+  margin-bottom: 35px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 15px 30px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  width: auto;
+}
+
+.tab-btn.active {
+  border-bottom: 4px solid #1e3a8a;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.tab-content input[type="file"],
+.tab-content input[type="url"],
+.tab-content input[type="text"] {
+  width: 80%;
+  padding: 13px;
+  margin: 18px 0;
+  border-radius: 6px;
+}
+
+.tab-content button[type="submit"] {
+  width: 80%;
+  padding: 13px;
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tab-content button[type="submit"]:hover {
+  background: #3b6ff5;
+}
+
+/* ===== DASHBOARD LIGHT MODE ===== */
+body:not(.dark-mode) .vt-page {
+  background: #f4f7fb;
+}
+
+body:not(.dark-mode) .vt-card {
+  background: white;
+  color: #111827;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+}
+
+body:not(.dark-mode) .tab-content h1 {
+  color: #1e3a8a;
+}
+
+body:not(.dark-mode) .tab-content p {
+  color: #374151;
+}
+
+body:not(.dark-mode) .tab-btn {
+  color: #1e3a8a;
+}
+
+body:not(.dark-mode) .tab-btn.active {
+  color: #111827;
+  border-bottom: 4px solid #1e3a8a;
+}
+
+body:not(.dark-mode) .tab-content input[type="file"],
+body:not(.dark-mode) .tab-content input[type="url"],
+body:not(.dark-mode) .tab-content input[type="text"] {
+  background: white;
+  color: #111827;
+  border: 1px solid #1e3a8a;
+}
+
+/* ===== DASHBOARD DARK MODE ===== */
+body.dark-mode .vt-page {
+  background: #111827;
+}
+
+body.dark-mode .vt-card {
+  background: #171827;
+  color: white;
+}
+
+body.dark-mode .tab-content h1 {
+  color: white;
+}
+
+body.dark-mode .tab-content p {
+  color: #d1d5db;
+}
+
+body.dark-mode .tab-btn {
+  color: #93c5fd;
+}
+
+body.dark-mode .tab-btn.active {
+  color: white;
+  border-bottom: 4px solid #93c5fd;
+}
+
+body.dark-mode .tab-content input[type="file"],
+body.dark-mode .tab-content input[type="url"],
+body.dark-mode .tab-content input[type="text"] {
+  background: transparent;
+  color: white;
+  border: 1px solid #93c5fd;
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">RaptorScanner</div>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/login">Login</a>
+      <a href="/register">Sign Up</a>
+      <button id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <!-- Register Page -->
+  <main class="auth-page">
+    <div class="auth-card">
+      <h1>RaptorScanner</h1>
+      <h2>Create Account</h2>
+
+      <% if (error) { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+
+      <% if (success) { %>
+        <p class="success"><%= success %></p>
+      <% } %>
+
+      <form action="/register" method="POST">
+        <input type="text" name="name" placeholder="Full Name" required>
+
+        <input type="email" name="email" placeholder="Email" required>
+
+        <input type="password" name="password" placeholder="Password" required>
+
+        <button type="submit">Register</button>
+      </form>
+
+      <p>
+        Already have an account?
+        <a href="/login">Login here</a>
+      </p>
+    </div>
+  </main>
+
+  <script src="/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">RaptorScanner</div>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">Scan History</a>
+      <a href="/logout">Logout</a>
+      <button id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <section class="home-hero">
+    <div class="home-hero-box">
+      <h1>Welcome to RaptorScanner</h1>
+
+      <p>
+        RaptorScanner is a web-based malware file analysis dashboard inspired by
+        VirusTotal. It helps users scan uploaded files, generate hash values, and
+        view a simple risk report before opening files.
+      </p>
+
+      <a href="/dashboard" class="home-btn">Go to Dashboard</a>
+    </div>
+  </section>
+
+  <section class="home-about">
+    <h2>About Our Website</h2>
+
+    <p>
+      Many users download files from the internet without checking whether the
+      files are safe. Some files may contain viruses, trojans, worms, or
+      ransomware. RaptorScanner helps users check files through a simple and
+      user-friendly dashboard.
+    </p>
+  </section>
+
+  <section class="home-features">
+    <h2>Main Features</h2>
+
+    <div class="feature-grid">
+      <div class="feature-box">
+        <h3>Secure Login</h3>
+        <p>Users can register and log in securely.</p>
+      </div>
+
+      <div class="feature-box">
+        <h3>File Upload</h3>
+        <p>Users can upload files for analysis.</p>
+      </div>
+
+      <div class="feature-box">
+        <h3>Hash Generator</h3>
+        <p>The system generates MD5, SHA-1, and SHA-256 hash values.</p>
+      </div>
+
+      <div class="feature-box">
+        <h3>Malware Scan</h3>
+        <p>Uploaded files can be scanned using ClamAV.</p>
+      </div>
+
+      <div class="feature-box">
+        <h3>Risk Level</h3>
+        <p>The system shows Low, Medium, or High risk level.</p>
+      </div>
+
+      <div class="feature-box">
+        <h3>Scan History</h3>
+        <p>Users can view previous scan results.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="home-footer">
+    <p>RaptorScanner | Final Year Project</p>
+  </footer>
+
+  <script src="/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scan Result - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <div class="result-container">
+
+    <h1>RaptorScanner Report</h1>
+    <p class="subtitle">Mini VirusTotal-style file analysis result</p>
+
+    <div class="card">
+      <h2>File Information</h2>
+
+      <p><strong>Original File Name:</strong> <%= file.originalname %></p>
+      <p><strong>Stored File Name:</strong> <%= file.filename %></p>
+      <p><strong>File Size:</strong> <%= (file.size / 1024).toFixed(2) %> KB</p>
+    </div>
+
+    <div class="card">
+      <h2>Hash Values</h2>
+
+      <p><strong>MD5:</strong></p>
+      <p class="hash"><%= md5Hash %></p>
+
+      <p><strong>SHA-1:</strong></p>
+      <p class="hash"><%= sha1Hash %></p>
+
+      <p><strong>SHA-256:</strong></p>
+      <p class="hash"><%= sha256Hash %></p>
+    </div>
+
+    <div class="card">
+      <h2>Scan Result</h2>
+
+      <p><strong>Status:</strong> <%= scanResult %></p>
+
+      <% if (riskLevel === "High") { %>
+        <p class="risk-high">
+          <strong>Risk Level:</strong> <%= riskLevel %>
+        </p>
+      <% } else if (riskLevel === "Medium") { %>
+        <p class="risk-medium">
+          <strong>Risk Level:</strong> <%= riskLevel %>
+        </p>
+      <% } else { %>
+        <p class="risk-low">
+          <strong>Risk Level:</strong> <%= riskLevel %>
+        </p>
+      <% } %>
+    </div>
+
+    <div class="card">
+      <h2>Recommendation</h2>
+
+      <% if (riskLevel === "High") { %>
+        <p>This file has a high-risk extension. Do not open it unless you trust the source.</p>
+      <% } else if (riskLevel === "Medium") { %>
+        <p>This file has a medium risk level. Please check carefully before opening it.</p>
+      <% } else { %>
+        <p>This file appears to be low risk based on basic file analysis.</p>
+      <% } %>
+    </div>
+
+    <div class="button-area">
+      <a class="btn" href="/dashboard">Scan Another File</a>
+      <a class="btn secondary" href="/history">View History</a>
+      <a class="btn danger" href="/logout">Logout</a>
+    </div>
+
+  </div>
+
+</body>
+</html>

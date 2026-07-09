@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>URL Result - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">RaptorScanner</div>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">Scan History</a>
+      <a href="/logout">Logout</a>
+      <button id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <div class="result-container">
+    <h1>URL Scan Result</h1>
+
+    <div class="card">
+      <h2>URL Information</h2>
+      <p><strong>URL:</strong> <%= url %></p>
+      <p><strong>Domain:</strong> <%= urlResult.domain %></p>
+      <p><strong>Protocol:</strong> <%= urlResult.protocol %></p>
+    </div>
+
+    <div class="card">
+      <h2>Analysis Result</h2>
+      <p><strong>Status:</strong> <%= urlResult.scanResult %></p>
+
+      <% if (urlResult.riskLevel === "High") { %>
+        <p class="risk-high"><strong>Risk Level:</strong> <%= urlResult.riskLevel %></p>
+      <% } else if (urlResult.riskLevel === "Medium") { %>
+        <p class="risk-medium"><strong>Risk Level:</strong> <%= urlResult.riskLevel %></p>
+      <% } else { %>
+        <p class="risk-low"><strong>Risk Level:</strong> <%= urlResult.riskLevel %></p>
+      <% } %>
+
+      <p><strong>Reason:</strong> <%= urlResult.reason %></p>
+    </div>
+
+    <a class="btn" href="/dashboard">Back to Dashboard</a>
+  </div>
+
+  <script src="/theme.js"></script>
+</body>
+</html>
