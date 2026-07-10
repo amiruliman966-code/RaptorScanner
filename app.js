@@ -5,6 +5,7 @@ require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
 const scanRoutes = require("./routes/scanRoutes");
+const passport = require("./config/passport");
 
 const app = express();
 
@@ -12,6 +13,12 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
+
+// Prevent browser from showing cached protected pages after logout
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 
 // EJS setup
 app.set("view engine", "ejs");
@@ -26,13 +33,17 @@ app.use(
   })
 );
 
-// Routes
+// Passport setup for Google login
+app.use(passport.initialize());
+
+// Home page
 app.get("/", (req, res) => {
   res.render("home", {
     user: req.session.user || null,
   });
 });
 
+// Routes
 app.use("/", authRoutes);
 app.use("/", scanRoutes);
 

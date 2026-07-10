@@ -91,26 +91,42 @@ function scanWithClamAV(filePath) {
   return new Promise((resolve) => {
     const clamscanPath = process.env.CLAMSCAN_PATH || "clamscan";
 
-    execFile(clamscanPath, [filePath], (error, stdout, stderr) => {
-      console.log("CLAMAV OUTPUT:", stdout);
-      console.log("CLAMAV ERROR:", stderr);
+    console.log("Using ClamAV path:", clamscanPath);
+    console.log("Scanning file:", filePath);
 
-      // ClamAV code 0 = clean
+    execFile(clamscanPath, [filePath], (error, stdout, stderr) => {
+      console.log("CLAMAV STDOUT:", stdout);
+      console.log("CLAMAV STDERR:", stderr);
+
+      if (error) {
+        console.log("CLAMAV ERROR CODE:", error.code);
+        console.log("CLAMAV ERROR MESSAGE:", error.message);
+      }
+
+      // Code 0 = clean file
       if (!error) {
         return resolve("Clean");
       }
 
-      // ClamAV code 1 = malware found
+      // Code 1 = malware found
       if (error.code === 1) {
         return resolve("Malware Detected");
       }
 
-      // ClamAV code 2 or other = scanner error
+      // ClamAV file not found
+      if (error.code === "ENOENT") {
+        return resolve("ClamAV Not Found");
+      }
+
+      // Database missing
+      if (stderr && stderr.includes("No supported database files found")) {
+        return resolve("ClamAV Database Missing");
+      }
+
       return resolve("ClamAV Scan Error");
     });
   });
 }
-
 // Scan file route
 router.post("/scan", isAuthenticated, upload.single("file"), async (req, res) => {
   try {
@@ -170,16 +186,23 @@ router.post("/scan", isAuthenticated, upload.single("file"), async (req, res) =>
 });
 
 // Scan history page
+// Scan history page
 router.get("/history", isAuthenticated, async (req, res) => {
   try {
-    const [scans] = await db.query(
+    const [fileScans] = await db.query(
       "SELECT * FROM scans WHERE user_id = ? ORDER BY scanned_at DESC",
+      [req.session.user.id]
+    );
+
+    const [urlScans] = await db.query(
+      "SELECT * FROM url_scans WHERE user_id = ? ORDER BY scanned_at DESC",
       [req.session.user.id]
     );
 
     res.render("history", {
       user: req.session.user,
-      scans: scans,
+      fileScans: fileScans,
+      urlScans: urlScans,
     });
   } catch (err) {
     console.error("HISTORY ERROR:", err);

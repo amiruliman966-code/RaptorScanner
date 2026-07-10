@@ -6,62 +6,260 @@
 </head>
 <body>
 
+  <nav class="navbar">
+    <div class="logo">RaptorScanner</div>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">Scan History</a>
+      <a href="/logout">Logout</a>
+      <button id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
   <div class="history-container">
     <h1>Scan History</h1>
-    <p class="subtitle">Previous file analysis reports</p>
+    <p class="subtitle">View your previous file and URL scan results.</p>
 
-    <% if (scans.length === 0) { %>
-      <div class="card">
-        <p>No scan history found.</p>
-      </div>
-    <% } else { %>
+    <div class="history-tabs">
+      <button class="history-tab-btn active" onclick="showHistoryTab('fileHistory', this)">
+        File History
+      </button>
+      <button class="history-tab-btn" onclick="showHistoryTab('urlHistory', this)">
+        URL History
+      </button>
+    </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>File Name</th>
-            <th>File Size</th>
-            <th>Scan Result</th>
-            <th>Risk Level</th>
-            <th>Scanned At</th>
-          </tr>
-        </thead>
+    <!-- FILE HISTORY -->
+    <div id="fileHistory" class="history-tab-content active">
+      <h2>File Scan History</h2>
 
-        <tbody>
-          <% scans.forEach((scan, index) => { %>
-            <tr>
-              <td><%= index + 1 %></td>
-              <td><%= scan.original_name %></td>
-              <td><%= (scan.file_size / 1024).toFixed(2) %> KB</td>
-              <td><%= scan.scan_result %></td>
+      <% if (fileScans.length === 0) { %>
+        <div class="card">
+          <p>No file scan history found.</p>
+        </div>
+      <% } else { %>
+        <div class="table-wrapper">
+          <table id="fileHistoryTable">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>File Name</th>
+                <th>File Size</th>
+                <th>Status</th>
+                <th>Risk Level</th>
+                <th>Scanned At</th>
+              </tr>
+            </thead>
 
-              <td>
-                <% if (scan.risk_level === "High") { %>
-                  <span class="badge high">High</span>
-                <% } else if (scan.risk_level === "Medium") { %>
-                  <span class="badge medium">Medium</span>
-                <% } else { %>
-                  <span class="badge low">Low</span>
-                <% } %>
-              </td>
+            <tbody>
+              <% fileScans.forEach((scan, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><%= scan.original_name %></td>
+                  <td><%= (scan.file_size / 1024).toFixed(2) %> KB</td>
+                  <td><%= scan.scan_result %></td>
 
-              <td>
-                <%= new Date(scan.scanned_at).toLocaleString() %>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+                  <td>
+                    <% if (scan.risk_level === "High") { %>
+                      <span class="badge high">High</span>
+                    <% } else if (scan.risk_level === "Medium") { %>
+                      <span class="badge medium">Medium</span>
+                    <% } else { %>
+                      <span class="badge low">Low</span>
+                    <% } %>
+                  </td>
 
-    <% } %>
+                  <td><%= new Date(scan.scanned_at).toLocaleString() %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-footer">
+          <div id="fileHistoryInfo" class="pagination-info"></div>
+          <div id="fileHistoryPagination" class="pagination-buttons"></div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- URL HISTORY -->
+    <div id="urlHistory" class="history-tab-content">
+      <h2>URL Scan History</h2>
+
+      <% if (urlScans.length === 0) { %>
+        <div class="card">
+          <p>No URL scan history found.</p>
+        </div>
+      <% } else { %>
+        <div class="table-wrapper">
+          <table id="urlHistoryTable" class="url-history-table">
+            <thead>
+              <tr>
+                <th class="no-col">No.</th>
+                <th class="url-col">URL</th>
+                <th class="domain-col">Domain</th>
+                <th class="status-col">Status</th>
+                <th class="risk-col">Risk Level</th>
+                <th class="date-col">Scanned At</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% urlScans.forEach((scan, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+
+                  <td class="url-cell">
+                    <%= scan.url %>
+                  </td>
+
+                  <td class="domain-cell">
+                    <%= scan.domain %>
+                  </td>
+
+                  <td>
+                    <%= scan.scan_result %>
+                  </td>
+
+                  <td>
+                    <% if (scan.risk_level === "High") { %>
+                      <span class="badge high">High</span>
+                    <% } else if (scan.risk_level === "Medium") { %>
+                      <span class="badge medium">Medium</span>
+                    <% } else { %>
+                      <span class="badge low">Low</span>
+                    <% } %>
+                  </td>
+
+                  <td>
+                    <%= new Date(scan.scanned_at).toLocaleString() %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-footer">
+          <div id="urlHistoryInfo" class="pagination-info"></div>
+          <div id="urlHistoryPagination" class="pagination-buttons"></div>
+        </div>
+      <% } %>
+    </div>
 
     <div class="button-area">
       <a class="btn" href="/dashboard">Back to Dashboard</a>
-      <a class="btn danger" href="/logout">Logout</a>
     </div>
-
   </div>
 
+  <script>
+    function showHistoryTab(tabId, button) {
+      const contents = document.querySelectorAll(".history-tab-content");
+      const buttons = document.querySelectorAll(".history-tab-btn");
+
+      contents.forEach(content => content.classList.remove("active"));
+      buttons.forEach(btn => btn.classList.remove("active"));
+
+      document.getElementById(tabId).classList.add("active");
+      button.classList.add("active");
+    }
+
+    function setupPagination(tableId, infoId, paginationId, rowsPerPage = 10) {
+      const table = document.getElementById(tableId);
+
+      if (!table) return;
+
+      const rows = Array.from(table.querySelectorAll("tbody tr"));
+      const infoBox = document.getElementById(infoId);
+      const paginationBox = document.getElementById(paginationId);
+
+      let currentPage = 1;
+      const totalRows = rows.length;
+      const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+      function showPage(page) {
+        currentPage = page;
+
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        rows.forEach((row, index) => {
+          row.style.display = index >= start && index < end ? "" : "none";
+        });
+
+        const showingStart = totalRows === 0 ? 0 : start + 1;
+        const showingEnd = Math.min(end, totalRows);
+
+        infoBox.textContent = `Showing ${showingStart} to ${showingEnd} of ${totalRows} entries`;
+
+        renderButtons();
+      }
+
+      function renderButtons() {
+        paginationBox.innerHTML = "";
+
+        const firstBtn = createButton("«", 1, currentPage === 1);
+        const prevBtn = createButton("‹", currentPage - 1, currentPage === 1);
+
+        paginationBox.appendChild(firstBtn);
+        paginationBox.appendChild(prevBtn);
+
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+
+        if (endPage - startPage < 4) {
+          startPage = Math.max(1, endPage - 4);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+          const btn = createButton(i, i, false);
+
+          if (i === currentPage) {
+            btn.classList.add("active");
+          }
+
+          paginationBox.appendChild(btn);
+        }
+
+        const nextBtn = createButton("›", currentPage + 1, currentPage === totalPages);
+        const lastBtn = createButton("»", totalPages, currentPage === totalPages);
+
+        paginationBox.appendChild(nextBtn);
+        paginationBox.appendChild(lastBtn);
+      }
+
+      function createButton(text, page, disabled) {
+        const button = document.createElement("button");
+        button.textContent = text;
+        button.className = "page-btn";
+
+        if (disabled) {
+          button.disabled = true;
+        }
+
+        button.addEventListener("click", () => {
+          if (!disabled) {
+            showPage(page);
+          }
+        });
+
+        return button;
+      }
+
+      if (totalRows > 0) {
+        showPage(1);
+      }
+    }
+
+    window.addEventListener("load", function () {
+      setupPagination("fileHistoryTable", "fileHistoryInfo", "fileHistoryPagination", 10);
+      setupPagination("urlHistoryTable", "urlHistoryInfo", "urlHistoryPagination", 10);
+    });
+  </script>
+
+  <script src="/theme.js"></script>
 </body>
 </html>

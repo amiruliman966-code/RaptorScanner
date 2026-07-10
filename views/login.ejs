@@ -18,11 +18,24 @@
     </div>
   </nav>
 
-  <!-- Login Page -->
-  <main class="auth-page">
-    <div class="auth-card">
+  <!-- Facebook-style Login Page -->
+  <main class="fb-login-page">
+
+    <!-- Left Side Branding -->
+    <section class="login-brand">
+      <div class="logo-badge">🛡️</div>
+
       <h1>RaptorScanner</h1>
-      <h2>Login</h2>
+
+      <p>
+        Scan files, check URLs, generate hashes, and view simple malware risk
+        reports before opening suspicious files.
+      </p>
+    </section>
+
+    <!-- Right Side Login Box -->
+    <section class="login-box">
+      <h2>Log in to RaptorScanner</h2>
 
       <% if (error) { %>
         <p class="error"><%= error %></p>
@@ -33,18 +46,36 @@
       <% } %>
 
       <form action="/login" method="POST">
-        <input type="email" name="email" placeholder="Email" required>
+        <input 
+          type="email" 
+          name="email" 
+          placeholder="Email address" 
+          required
+        >
 
-        <input type="password" name="password" placeholder="Password" required>
+        <input 
+          type="password" 
+          name="password" 
+          placeholder="Password" 
+          required
+        >
 
-        <button type="submit">Login</button>
+        <button type="submit">Log in</button>
       </form>
 
-      <p>
-        Don't have an account?
-        <a href="/register">Register here</a>
-      </p>
-    </div>
+      <div class="divider">
+        <span>or login with</span>
+      </div>
+
+      <div class="social-login">
+        <a href="/auth/google" class="social-btn google">G</a>
+      </div>
+
+      <a href="/register" class="create-account-btn">
+        Create new account
+      </a>
+    </section>
+
   </main>
 
   <script src="/theme.js"></script>

@@ -6,34 +6,54 @@
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="logo">RaptorScanner</div>
+  <!-- Home Navbar -->
+ <nav class="home-navbar">
+  <div class="home-logo">RaptorScanner</div>
 
-    <div class="nav-links">
-      <a href="/">Home</a>
-      <a href="/dashboard">Dashboard</a>
-      <a href="/history">Scan History</a>
-      <a href="/logout">Logout</a>
-      <button id="themeToggle" class="theme-btn">🌙</button>
-    </div>
-  </nav>
+  <div class="home-nav-center">
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#features">Features</a>
+  </div>
 
-  <section class="home-hero">
-    <div class="home-hero-box">
-      <h1>Welcome to RaptorScanner</h1>
+  <div class="home-nav-right">
+    <a href="/login" class="login-nav-btn">Login</a>
+    <button id="themeToggle" class="theme-btn">🌙</button>
+  </div>
+</nav>
 
-      <p>
-        RaptorScanner is a web-based malware file analysis dashboard inspired by
-        VirusTotal. It helps users scan uploaded files, generate hash values, and
-        view a simple risk report before opening files.
-      </p>
+  <!-- Hero Section -->
+<section id="home" class="hero-home">
 
-      <a href="/dashboard" class="home-btn">Go to Dashboard</a>
-    </div>
-  </section>
+  <video autoplay muted loop playsinline class="hero-video">
+    <source src="/videos/home-video.mp4" type="video/mp4">
+  </video>
 
-  <section class="home-about">
+  <div class="hero-video-overlay"></div>
+
+  <div class="hero-text">
+    <h1>Welcome to RaptorScanner</h1>
+
+    <p>
+      RaptorScanner is a web-based malware file analysis dashboard inspired by
+      VirusTotal. It helps users scan uploaded files, generate hash values, and
+      view a simple risk report before opening files.
+    </p>
+
+    <a href="/dashboard" class="hero-main-btn">Go to Dashboard</a>
+  </div>
+
+</section>
+
+  <!-- About Website -->
+  <section id="about" class="home-about-section">
     <h2>About Our Website</h2>
+
+    <p>
+      RaptorScanner is a web-based malware file analysis dashboard inspired by
+      VirusTotal. It helps users scan uploaded files, generate hash values, and
+      view a simple risk report before opening suspicious files.
+    </p>
 
     <p>
       Many users download files from the internet without checking whether the
@@ -43,45 +63,49 @@
     </p>
   </section>
 
-  <section class="home-features">
+  <!-- Main Features -->
+  <section id="features" class="home-features-section">
     <h2>Main Features</h2>
 
-    <div class="feature-grid">
-      <div class="feature-box">
+    <div class="home-feature-grid">
+      <div class="home-feature-box">
         <h3>Secure Login</h3>
         <p>Users can register and log in securely.</p>
       </div>
 
-      <div class="feature-box">
+      <div class="home-feature-box">
         <h3>File Upload</h3>
-        <p>Users can upload files for analysis.</p>
+        <p>Users can upload files for malware analysis.</p>
       </div>
 
-      <div class="feature-box">
+      <div class="home-feature-box">
         <h3>Hash Generator</h3>
         <p>The system generates MD5, SHA-1, and SHA-256 hash values.</p>
       </div>
 
-      <div class="feature-box">
+      <div class="home-feature-box">
         <h3>Malware Scan</h3>
         <p>Uploaded files can be scanned using ClamAV.</p>
       </div>
 
-      <div class="feature-box">
-        <h3>Risk Level</h3>
-        <p>The system shows Low, Medium, or High risk level.</p>
+      <div class="home-feature-box">
+        <h3>URL Scan</h3>
+        <p>Users can scan URLs and check whether they look suspicious.</p>
       </div>
 
-      <div class="feature-box">
+      <div class="home-feature-box">
         <h3>Scan History</h3>
-        <p>Users can view previous scan results.</p>
+        <p>Users can view previous file and URL scan results.</p>
       </div>
     </div>
   </section>
 
+  <!-- Footer -->
   <footer class="home-footer">
     <p>RaptorScanner | Final Year Project</p>
   </footer>
+
+  <!-- Floating Button -->
 
   <script src="/theme.js"></script>
 </body>
