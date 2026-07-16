@@ -17,6 +17,16 @@
   --shadow: 0 0 15px rgba(0, 0, 0, 0.08);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+#home,
+#about,
+#features {
+  scroll-margin-top: 100px;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -29,9 +39,8 @@ body.dark-mode {
   color: var(--white);
 }
 
-/* ===== NAVBAR ===== */
-.navbar,
-.home-navbar {
+/* ===== NORMAL NAVBAR ===== */
+.navbar {
   height: 65px;
   background: var(--blue);
   display: flex;
@@ -40,29 +49,26 @@ body.dark-mode {
   padding: 0 60px;
 }
 
-.logo,
-.home-logo {
+.logo {
   color: var(--white);
   font-size: 28px;
   font-weight: bold;
+  white-space: nowrap;
 }
 
-.nav-links,
-.home-nav-links {
+.nav-links {
   display: flex;
   align-items: center;
   gap: 30px;
 }
 
-.nav-links a,
-.home-nav-links a {
+.nav-links a {
   color: var(--white);
   text-decoration: none;
   font-size: 17px;
 }
 
-.nav-links a:hover,
-.home-nav-links a:hover {
+.nav-links a:hover {
   text-decoration: underline;
 }
 
@@ -72,6 +78,80 @@ body.dark-mode {
   color: var(--white);
   font-size: 22px;
   cursor: pointer;
+}
+
+/* Dashboard hamburger button */
+.nav-toggle {
+  display: none;
+  background: none;
+  border: 2px solid white;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 5px 12px;
+}
+
+/* ===== HOME NAVBAR ===== */
+.home-navbar {
+  height: 90px;
+  background: var(--blue);
+  display: flex;
+  align-items: center;
+  padding: 0 90px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+}
+
+.home-logo {
+  color: white;
+  font-size: 30px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.home-nav-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 45px;
+}
+
+.home-nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.home-nav-center a,
+.home-nav-right a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.home-nav-center a:hover,
+.home-nav-right a:hover {
+  text-decoration: underline;
+}
+
+.login-nav-btn {
+  padding: 10px 22px;
+  border: 2px solid white;
+  border-radius: 25px;
+}
+
+.login-nav-btn:hover {
+  background: white;
+  color: var(--blue);
+  text-decoration: none;
 }
 
 /* ===== LOGIN / REGISTER PAGE ===== */
@@ -87,12 +167,21 @@ body.dark-mode {
 
 .login-brand {
   width: 720px;
+  height: 530px;
   margin-left: -120px;
-  background: var(--dark-card);
   padding: 45px 60px;
   border-radius: 18px;
   box-shadow: var(--shadow);
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background:
+    linear-gradient(rgba(17, 24, 39, 0.75), rgba(17, 24, 39, 0.75)),
+    url("/images/login.jpg") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
 }
 
 .logo-badge {
@@ -110,14 +199,14 @@ body.dark-mode {
 
 .login-brand h1 {
   font-size: 52px;
-  color: var(--light-blue);
+  color: var(--light-blue) !important;
   margin: 0 0 20px;
 }
 
 .login-brand p {
   font-size: 22px;
   line-height: 1.5;
-  color: var(--white);
+  color: white !important;
   margin: 0;
 }
 
@@ -247,19 +336,7 @@ body.dark-mode {
   color: var(--text);
 }
 
-/* ===== HOME PAGE ===== */
-.home-navbar {
-  height: 90px;
-  padding: 0 90px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 10;
-}
-
-/* ===== HOME WELCOME HERO ===== */
-/* ===== HOME VIDEO HERO ===== */
+/* ===== HOME HERO VIDEO ===== */
 .hero-home {
   min-height: 680px;
   position: relative;
@@ -274,8 +351,7 @@ body.dark-mode {
 
 .hero-video {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -328,6 +404,7 @@ body.dark-mode {
   transform: translateY(-3px);
 }
 
+/* ===== HOME ABOUT / FEATURES ===== */
 .home-about-section,
 .home-features-section {
   padding: 80px 12%;
@@ -384,11 +461,16 @@ body.dark-mode {
 
 .home-footer {
   background: var(--blue);
-  color: var(--white);
+  color: white;
   text-align: center;
-  padding: 20px;
+  padding: 22px 20px;
+  font-size: 16px;
 }
 
+.home-footer p {
+  margin: 0;
+  color: white;
+}
 
 /* ===== DASHBOARD TABS ===== */
 .vt-page {
@@ -462,7 +544,7 @@ body.dark-mode {
   width: 80%;
   padding: 13px;
   background: var(--dark-blue);
-  color: var(--white);
+  color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -515,7 +597,7 @@ table {
 
 th {
   background: var(--dark-blue);
-  color: var(--white);
+  color: white;
   padding: 12px;
 }
 
@@ -579,7 +661,7 @@ td {
 
 .history-tab-btn.active {
   background: var(--dark-blue);
-  color: var(--white);
+  color: white;
 }
 
 .history-tab-content {
@@ -613,7 +695,7 @@ td {
   min-width: 42px;
   height: 42px;
   padding: 0 14px;
-  background: var(--white);
+  background: white;
   color: var(--dark-blue);
   border: 1px solid #d1d5db;
   cursor: pointer;
@@ -626,7 +708,7 @@ td {
 
 .page-btn.active {
   background: #2563eb;
-  color: var(--white);
+  color: white;
   border-color: #2563eb;
 }
 
@@ -655,7 +737,7 @@ td {
 .badge.medium,
 .risk-medium {
   background: #fef3c7;
-  color: #92400e;
+  color: #111827;
 }
 
 .badge.high,
@@ -676,7 +758,7 @@ td {
   padding: 10px 15px;
   margin: 5px;
   background: var(--dark-blue);
-  color: var(--white);
+  color: white;
   border-radius: 6px;
   text-decoration: none;
 }
@@ -699,10 +781,9 @@ body.dark-mode .vt-card,
 body.dark-mode .result-container,
 body.dark-mode .history-container {
   background: var(--dark-card);
-  color: var(--white);
+  color: white;
 }
 
-body.dark-mode .login-brand,
 body.dark-mode .home-feature-box,
 body.dark-mode .card {
   background: var(--dark-input);
@@ -735,7 +816,7 @@ body.dark-mode .tab-content input[type="file"],
 body.dark-mode .tab-content input[type="url"],
 body.dark-mode .tab-content input[type="text"] {
   background: var(--dark-input);
-  color: var(--white);
+  color: white;
   border: 1px solid #6b7280;
 }
 
@@ -745,7 +826,7 @@ body.dark-mode input::placeholder {
 
 body.dark-mode .hash {
   background: var(--dark-bg);
-  color: var(--white);
+  color: white;
 }
 
 body.dark-mode td {
@@ -763,7 +844,7 @@ body.dark-mode .social-btn {
 body.dark-mode .history-tab-btn.active,
 body.dark-mode .page-btn.active {
   background: var(--blue);
-  color: var(--white);
+  color: white;
 }
 
 body.dark-mode .create-account-btn {
@@ -776,26 +857,187 @@ body.dark-mode .create-account-btn:hover {
   color: var(--dark-bg);
 }
 
-/* ===== MOBILE ===== */
-@media (max-width: 900px) {
-  .navbar,
+body.dark-mode .tab-btn,
+body.dark-mode .tab-btn.active {
+  color: white !important;
+}
+
+body.dark-mode .tab-btn.active {
+  border-bottom: 4px solid white !important;
+}
+
+body.dark-mode .tab-btn:hover {
+  color: var(--light-blue) !important;
+}
+
+body.dark-mode .badge.low,
+body.dark-mode .risk-low {
+  color: #166534 !important;
+}
+
+body.dark-mode .badge.medium,
+body.dark-mode .risk-medium {
+  color: #111827 !important;
+}
+
+body.dark-mode .badge.high,
+body.dark-mode .risk-high {
+  color: #991b1b !important;
+}
+
+/* ===== TABLET VIEW ===== */
+@media (max-width: 1000px) {
   .home-navbar {
-    padding: 0 25px;
+    padding: 0 35px;
   }
 
-  .logo,
   .home-logo {
+    font-size: 26px;
+  }
+
+  .home-nav-center {
+    position: static;
+    transform: none;
+    margin-left: auto;
+    margin-right: 25px;
+    gap: 25px;
+  }
+
+  .home-nav-center a,
+  .home-nav-right a {
+    font-size: 16px;
+  }
+
+  .navbar {
+    padding: 0 35px;
+  }
+
+  .logo {
     font-size: 24px;
   }
 
-  .nav-links,
-  .home-nav-links {
+  .nav-links {
+    gap: 20px;
+  }
+
+  .nav-links a {
+    font-size: 15px;
+  }
+
+  .hero-text h1 {
+    font-size: 46px;
+  }
+
+  .hero-text p {
+    font-size: 20px;
+  }
+
+  .home-feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===== PHONE VIEW ===== */
+@media (max-width: 700px) {
+  /* Home navbar stays visible without hamburger */
+  .home-navbar {
+    height: auto;
+    flex-direction: column;
+    justify-content: center;
+    padding: 15px 20px;
+    gap: 14px;
+  }
+
+  .home-logo {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .home-nav-center {
+    position: static;
+    transform: none;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+
+  .home-nav-right {
+    margin: 0;
+    justify-content: center;
     gap: 15px;
   }
 
-  .nav-links a,
-  .home-nav-links a {
-    font-size: 14px;
+  .home-nav-center a,
+  .home-nav-right a {
+    font-size: 15px;
+  }
+
+  .login-nav-btn {
+    padding: 8px 18px;
+  }
+
+  /* Dashboard navbar becomes right hamburger */
+  #dashboardNavbar {
+    height: 65px !important;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px !important;
+  }
+
+  #dashboardNavbar .nav-toggle {
+    display: block;
+    margin-left: auto;
+  }
+
+  #dashboardNavbar .nav-links {
+    display: none !important;
+    position: absolute;
+    top: 65px;
+    right: 15px;
+    width: 230px;
+    background: var(--blue);
+    border-radius: 12px;
+    padding: 18px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 18px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    z-index: 999;
+  }
+
+  #dashboardNavbar.active .nav-links {
+    display: flex !important;
+  }
+
+  #dashboardNavbar .nav-links a {
+    font-size: 16px;
+  }
+
+  .theme-btn {
+    font-size: 22px;
+  }
+
+  .hero-home {
+    min-height: 620px;
+    padding: 160px 18px 70px;
+  }
+
+  .hero-text h1 {
+    font-size: 36px;
+  }
+
+  .hero-text p {
+    font-size: 17px;
+  }
+
+  .hero-main-btn {
+    padding: 14px 25px;
+    font-size: 16px;
   }
 
   .fb-login-page {
@@ -807,6 +1049,7 @@ body.dark-mode .create-account-btn:hover {
 
   .login-brand {
     width: 100%;
+    height: auto;
     margin-left: 0;
     text-align: center;
   }
@@ -829,21 +1072,22 @@ body.dark-mode .create-account-btn:hover {
     width: 95%;
   }
 
-  .hero-text h1 {
-    font-size: 40px;
+  .home-about-section,
+  .home-features-section {
+    padding: 60px 25px;
   }
 
-  .hero-text p {
-    font-size: 18px;
+  .home-about-section h2,
+  .home-features-section h2 {
+    font-size: 30px;
+  }
+
+  .home-about-section p {
+    font-size: 17px;
   }
 
   .home-feature-grid {
     grid-template-columns: 1fr;
-  }
-
-  .home-about-section,
-  .home-features-section {
-    padding: 60px 25px;
   }
 
   .pagination-footer {
@@ -858,124 +1102,356 @@ body.dark-mode .create-account-btn:hover {
   .url-history-table {
     min-width: 850px;
   }
-}
-/* ===== HOME NAVBAR CENTER FIX ===== */
-.home-navbar {
-  height: 90px;
-  background: var(--blue);
-  display: flex;
-  align-items: center;
-  padding: 0 90px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 10;
+
+  .home-footer {
+    padding: 18px 15px;
+    font-size: 14px;
+  }
 }
 
-.home-logo {
-  color: white;
-  font-size: 30px;
-  font-weight: bold;
-  width: 220px;
+/* ===== VERY SMALL PHONE ===== */
+@media (max-width: 400px) {
+  .home-logo,
+  .logo {
+    font-size: 22px;
+  }
+
+  .home-nav-center {
+    gap: 12px;
+  }
+
+  .home-nav-center a,
+  .home-nav-right a {
+    font-size: 14px;
+  }
+
+  .hero-text h1 {
+    font-size: 30px;
+  }
+
+  .hero-text p {
+    font-size: 15px;
+  }
+
+  .login-nav-btn {
+    padding: 7px 15px;
+  }
+
+  .home-footer {
+    font-size: 13px;
+  }
+}
+/* ===== ADVANCED SEARCH RESULT PAGE ===== */
+.advanced-result-page {
+  width: 90%;
+  max-width: 1200px;
+  margin: 50px auto;
 }
 
-/* This makes Home, About, Features exactly center */
-.home-nav-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 45px;
+.advanced-result-header {
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-.home-nav-center a {
-  color: white;
-  text-decoration: none;
+.advanced-result-header h1 {
+  color: var(--dark-blue);
+  font-size: 38px;
+  margin-bottom: 10px;
+}
+
+.advanced-result-header p {
+  color: var(--muted);
   font-size: 18px;
-  font-weight: 500;
 }
 
-.home-nav-center a:hover {
-  text-decoration: underline;
+.result-overview-card {
+  background: white;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-bottom: 25px;
+  border-left: 6px solid var(--dark-blue);
 }
 
-/* Right side only Login + theme */
-.home-nav-right {
-  margin-left: auto;
+.result-overview-card h2 {
+  margin: 8px 0 0;
+  color: var(--dark-blue);
+  word-break: break-word;
+}
+
+.result-label {
+  font-size: 13px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 25px;
+}
+
+.summary-box {
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.summary-box h3 {
+  color: var(--dark-blue);
+  font-size: 28px;
+  margin: 0 0 8px;
+}
+
+.summary-box p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.advanced-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.advanced-card h2 {
+  color: var(--dark-blue);
+  margin-bottom: 25px;
+}
+
+.advanced-result-item {
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 25px;
+  margin-bottom: 25px;
+  border-left: 5px solid var(--dark-blue);
+}
+
+.result-item-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
+  margin-bottom: 25px;
   gap: 20px;
 }
 
-/* Login button */
-.login-nav-btn {
+.result-item-header h3 {
+  color: var(--dark-blue);
+  margin: 0;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.details-grid p {
+  margin: 8px 0 0;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.break-text {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.hash-section {
+  margin-top: 25px;
+}
+
+.hash-section h4 {
+  color: var(--dark-blue);
+  margin-bottom: 15px;
+}
+
+.hash-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 80px;
+  align-items: center;
+  gap: 12px;
+  background: #e5e7eb;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.hash-row span {
+  font-weight: bold;
+  color: var(--dark-blue);
+}
+
+.hash-row code {
+  word-break: break-all;
+  font-size: 14px;
+}
+
+.hash-row button {
+  background: var(--dark-blue);
   color: white;
-  text-decoration: none;
-  font-size: 18px;
-  font-weight: 500;
-  padding: 10px 22px;
-  border: 2px solid white;
-  border-radius: 25px;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.hash-row button:hover {
+  background: var(--blue);
+}
+
+.empty-result {
+  background: #f9fafb;
+  padding: 30px;
+  border-radius: 14px;
   text-align: center;
 }
 
-.login-nav-btn:hover {
+.empty-result h3 {
+  color: var(--dark-blue);
+}
+
+.result-actions {
+  margin-top: 25px;
+  text-align: center;
+}
+
+/* Dark mode */
+body.dark-mode .advanced-result-header h1,
+body.dark-mode .advanced-card h2,
+body.dark-mode .result-overview-card h2,
+body.dark-mode .summary-box h3,
+body.dark-mode .result-item-header h3,
+body.dark-mode .hash-section h4,
+body.dark-mode .empty-result h3 {
+  color: var(--light-blue);
+}
+
+body.dark-mode .advanced-result-header p,
+body.dark-mode .summary-box p,
+body.dark-mode .details-grid p {
+  color: #e5e7eb;
+}
+
+body.dark-mode .result-overview-card,
+body.dark-mode .summary-box,
+body.dark-mode .advanced-card {
+  background: var(--dark-card);
+  color: white;
+}
+
+body.dark-mode .advanced-result-item,
+body.dark-mode .empty-result {
+  background: var(--dark-input);
+}
+
+body.dark-mode .hash-row {
+  background: var(--dark-bg);
+}
+
+body.dark-mode .hash-row span {
+  color: var(--light-blue);
+}
+
+body.dark-mode .hash-row code {
+  color: white;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .advanced-result-page {
+    width: 95%;
+    margin: 30px auto;
+  }
+
+  .advanced-result-header h1 {
+    font-size: 30px;
+  }
+
+  .result-overview-card,
+  .summary-grid,
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-item-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hash-row {
+    grid-template-columns: 1fr;
+  }
+
+  .hash-row button {
+    width: 100%;
+  }
+}
+/* ===== WHOIS INSIDE SEARCH RESULT ===== */
+.advanced-card {
   background: white;
-  color: var(--blue);
-  text-decoration: none;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  margin: 25px 0;
 }
 
-/* ===== SMOOTH SCROLL FOR HOME NAV LINKS ===== */
-html {
-  scroll-behavior: smooth;
+.advanced-card h2 {
+  color: var(--dark-blue);
+  margin-bottom: 25px;
 }
 
-/* Prevent fixed navbar from covering section title */
-#home,
-#about,
-#features {
-  scroll-margin-top: 100px;
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
-/* ===== LOGIN BRAND BOX BACKGROUND IMAGE ===== */
-.login-brand {
-  background:
-    linear-gradient(rgba(17, 24, 39, 0.75), rgba(17, 24, 39, 0.75)),
-    url("/images/login.jpg") !important;
-
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
+.result-label {
+  font-size: 13px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1px;
 }
 
-.login-brand h1 {
-  color: #93c5fd !important;
+.details-grid p {
+  margin: 8px 0 0;
+  color: var(--text);
+  font-size: 16px;
 }
 
-.login-brand p {
-  color: white !important;
-}
-/* ===== MAKE BRAND BOX SAME HEIGHT AS LOGIN BOX ===== */
-.login-brand {
-  height: 530px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-/* ===== DASHBOARD TAB FONT WHITE IN DARK MODE ===== */
-body.dark-mode .tab-btn {
-  color: white !important;
+.break-text {
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
-body.dark-mode .tab-btn.active {
-  color: white !important;
-  border-bottom: 4px solid white !important;
+/* Dark mode */
+body.dark-mode .advanced-card {
+  background: var(--dark-card);
+  color: white;
 }
 
-body.dark-mode .tab-btn:hover {
-  color: #93c5fd !important;
+body.dark-mode .advanced-card h2 {
+  color: var(--light-blue);
+}
+
+body.dark-mode .details-grid p {
+  color: #e5e7eb;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -33,3 +33,19 @@ if (themeToggle) {
     }
   });
 }
+
+// Hamburger navbar
+const navToggle = document.getElementById("navToggle");
+const navbar = document.getElementById("dashboardNavbar");
+
+if (navToggle && navbar) {
+  navToggle.addEventListener("click", () => {
+    navbar.classList.toggle("active");
+
+    if (navbar.classList.contains("active")) {
+      navToggle.textContent = "✕";
+    } else {
+      navToggle.textContent = "☰";
+    }
+  });
+}

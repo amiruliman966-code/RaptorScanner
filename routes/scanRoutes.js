@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const { execFile } = require("child_process");
 const db = require("../config/db");
+const axios = require("axios");
 
 const router = express.Router();
 
@@ -15,16 +16,12 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
-// Redirect if user opens /scan manually
-router.get("/scan", (req, res) => {
-  res.redirect("/dashboard");
-});
-
 // Check if user is logged in
 function isAuthenticated(req, res, next) {
   if (!req.session.user) {
     return res.redirect("/login");
   }
+
   next();
 }
 
@@ -49,6 +46,7 @@ function generateHash(filePath, algorithm) {
   const fileBuffer = fs.readFileSync(filePath);
   const hashSum = crypto.createHash(algorithm);
   hashSum.update(fileBuffer);
+
   return hashSum.digest("hex");
 }
 
@@ -103,22 +101,18 @@ function scanWithClamAV(filePath) {
         console.log("CLAMAV ERROR MESSAGE:", error.message);
       }
 
-      // Code 0 = clean file
       if (!error) {
         return resolve("Clean");
       }
 
-      // Code 1 = malware found
       if (error.code === 1) {
         return resolve("Malware Detected");
       }
 
-      // ClamAV file not found
       if (error.code === "ENOENT") {
         return resolve("ClamAV Not Found");
       }
 
-      // Database missing
       if (stderr && stderr.includes("No supported database files found")) {
         return resolve("ClamAV Database Missing");
       }
@@ -127,95 +121,6 @@ function scanWithClamAV(filePath) {
     });
   });
 }
-// Scan file route
-router.post("/scan", isAuthenticated, upload.single("file"), async (req, res) => {
-  try {
-    console.log("File received:", req.file);
-
-    if (!req.file) {
-      return res.redirect("/dashboard");
-    }
-
-    const filePath = req.file.path;
-
-    const md5Hash = generateHash(filePath, "md5");
-    const sha1Hash = generateHash(filePath, "sha1");
-    const sha256Hash = generateHash(filePath, "sha256");
-
-    // Scan using ClamAV
-    const scanResult = await scanWithClamAV(filePath);
-
-    // Risk level based on ClamAV result + file type
-    const riskLevel = calculateRisk(req.file, scanResult);
-
-    await db.query(
-      `INSERT INTO scans 
-      (user_id, original_name, file_name, file_size, md5_hash, sha1_hash, sha256_hash, scan_result, risk_level)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        req.session.user.id,
-        req.file.originalname,
-        req.file.filename,
-        req.file.size,
-        md5Hash,
-        sha1Hash,
-        sha256Hash,
-        scanResult,
-        riskLevel,
-      ]
-    );
-
-    res.render("scan-result", {
-      user: req.session.user,
-      file: req.file,
-      md5Hash: md5Hash,
-      sha1Hash: sha1Hash,
-      sha256Hash: sha256Hash,
-      scanResult: scanResult,
-      riskLevel: riskLevel,
-    });
-  } catch (err) {
-    console.error("SCAN ERROR:", err);
-
-    res.status(500).send(`
-      <h1>Scan Error</h1>
-      <p>${err.message}</p>
-      <a href="/dashboard">Back to Dashboard</a>
-    `);
-  }
-});
-
-// Scan history page
-// Scan history page
-router.get("/history", isAuthenticated, async (req, res) => {
-  try {
-    const [fileScans] = await db.query(
-      "SELECT * FROM scans WHERE user_id = ? ORDER BY scanned_at DESC",
-      [req.session.user.id]
-    );
-
-    const [urlScans] = await db.query(
-      "SELECT * FROM url_scans WHERE user_id = ? ORDER BY scanned_at DESC",
-      [req.session.user.id]
-    );
-
-    res.render("history", {
-      user: req.session.user,
-      fileScans: fileScans,
-      urlScans: urlScans,
-    });
-  } catch (err) {
-    console.error("HISTORY ERROR:", err);
-
-    res.status(500).send(`
-      <h1>History Error</h1>
-      <p>${err.message}</p>
-      <a href="/dashboard">Back to Dashboard</a>
-    `);
-  }
-});
-
-module.exports = router;
 
 // Simple URL risk checker
 function checkUrlRisk(inputUrl) {
@@ -307,6 +212,250 @@ function checkUrlRisk(inputUrl) {
   }
 }
 
+// Detect search type
+function detectSearchType(query) {
+  const cleanQuery = query.trim();
+
+  const md5Regex = /^[a-fA-F0-9]{32}$/;
+  const sha1Regex = /^[a-fA-F0-9]{40}$/;
+  const sha256Regex = /^[a-fA-F0-9]{64}$/;
+  const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+
+  if (sha256Regex.test(cleanQuery)) return "SHA-256 Hash";
+  if (sha1Regex.test(cleanQuery)) return "SHA-1 Hash";
+  if (md5Regex.test(cleanQuery)) return "MD5 Hash";
+  if (ipRegex.test(cleanQuery)) return "IP Address";
+
+  try {
+    new URL(cleanQuery);
+    return "URL";
+  } catch (error) {
+    return "Domain";
+  }
+}
+
+// Clean domain, URL, or IP
+function cleanWhoisTarget(input) {
+  try {
+    let value = input.trim().toLowerCase();
+
+    if (value.startsWith("http://") || value.startsWith("https://")) {
+      const parsedUrl = new URL(value);
+      return parsedUrl.hostname.replace("www.", "");
+    }
+
+    return value
+      .replace("http://", "")
+      .replace("https://", "")
+      .replace("www.", "")
+      .split("/")[0]
+      .trim();
+  } catch (err) {
+    return input.trim().toLowerCase();
+  }
+}
+
+// Get registrar / organization from RDAP
+function getRdapEntityName(data) {
+  if (!data.entities || data.entities.length === 0) {
+    return "Not available";
+  }
+
+  const registrarEntity = data.entities.find((entity) => {
+    return entity.roles && entity.roles.includes("registrar");
+  });
+
+  const orgEntity =
+    registrarEntity ||
+    data.entities.find((entity) => {
+      return entity.roles && entity.roles.includes("registrant");
+    }) ||
+    data.entities[0];
+
+  if (orgEntity && orgEntity.vcardArray && orgEntity.vcardArray[1]) {
+    const vcard = orgEntity.vcardArray[1];
+
+    const fn = vcard.find((item) => item[0] === "fn");
+    const org = vcard.find((item) => item[0] === "org");
+
+    if (fn && fn[3]) {
+      return fn[3];
+    }
+
+    if (org && org[3]) {
+      return org[3];
+    }
+  }
+
+  return "Not available";
+}
+
+// RDAP lookup for .com, .my, domain, and IP
+async function getRdapResult(target, searchType) {
+  try {
+    let rdapUrl = "";
+
+    // IP address lookup
+    if (searchType === "IP Address") {
+      rdapUrl = `https://rdap.org/ip/${target}`;
+    }
+
+    // Malaysia domains: .my, .edu.my, .com.my, .net.my, etc.
+    else if (target.endsWith(".my")) {
+      rdapUrl = `https://rdap.mynic.my/rdap/domain/${target}`;
+    }
+
+    // Other domains: .com, .org, .net, etc.
+    else {
+      rdapUrl = `https://rdap.org/domain/${target}`;
+    }
+
+    console.log("RDAP URL:", rdapUrl);
+
+    const response = await axios.get(rdapUrl, {
+      timeout: 15000,
+      headers: {
+        "User-Agent": "RaptorScanner-FYP",
+        Accept: "application/rdap+json, application/json",
+      },
+    });
+
+    const data = response.data;
+
+    let registrar = getRdapEntityName(data);
+    let creationDate = "Not available";
+    let expiryDate = "Not available";
+    let updatedDate = "Not available";
+    let nameServers = "Not available";
+    let status = "Not available";
+
+    // Get dates
+    if (data.events && data.events.length > 0) {
+      data.events.forEach((event) => {
+        if (event.eventAction === "registration") {
+          creationDate = event.eventDate;
+        }
+
+        if (event.eventAction === "expiration") {
+          expiryDate = event.eventDate;
+        }
+
+        if (
+          event.eventAction === "last changed" ||
+          event.eventAction === "last update of RDAP database"
+        ) {
+          updatedDate = event.eventDate;
+        }
+      });
+    }
+
+    // Get name servers
+    if (data.nameservers && data.nameservers.length > 0) {
+      nameServers = data.nameservers
+        .map((ns) => ns.ldhName || ns.unicodeName)
+        .filter(Boolean)
+        .join(", ");
+    }
+
+    // For IP address, show IP range instead of name server
+    if (searchType === "IP Address" && data.startAddress && data.endAddress) {
+      nameServers = `${data.startAddress} - ${data.endAddress}`;
+    }
+
+    // Get status
+    if (data.status && data.status.length > 0) {
+      status = data.status.join(", ");
+    }
+
+    return {
+      registrar,
+      creationDate,
+      expiryDate,
+      updatedDate,
+      nameServers,
+      status,
+      rawData: data,
+    };
+  } catch (err) {
+    console.error("RDAP ERROR:", err.message);
+
+    if (err.response) {
+      console.error("RDAP STATUS:", err.response.status);
+      console.error("RDAP DATA:", err.response.data);
+    }
+
+    return {
+      registrar: "Not available",
+      creationDate: "Not available",
+      expiryDate: "Not available",
+      updatedDate: "Not available",
+      nameServers: "Not available",
+      status: "RDAP lookup failed",
+      rawData: {},
+    };
+  }
+}
+
+// Redirect if user opens /scan manually
+router.get("/scan", (req, res) => {
+  res.redirect("/dashboard");
+});
+
+// Scan file route
+router.post("/scan", isAuthenticated, upload.single("file"), async (req, res) => {
+  try {
+    console.log("File received:", req.file);
+
+    if (!req.file) {
+      return res.redirect("/dashboard");
+    }
+
+    const filePath = req.file.path;
+
+    const md5Hash = generateHash(filePath, "md5");
+    const sha1Hash = generateHash(filePath, "sha1");
+    const sha256Hash = generateHash(filePath, "sha256");
+
+    const scanResult = await scanWithClamAV(filePath);
+    const riskLevel = calculateRisk(req.file, scanResult);
+
+    await db.query(
+      `INSERT INTO scans
+      (user_id, original_name, file_name, file_size, md5_hash, sha1_hash, sha256_hash, scan_result, risk_level)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        req.session.user.id,
+        req.file.originalname,
+        req.file.filename,
+        req.file.size,
+        md5Hash,
+        sha1Hash,
+        sha256Hash,
+        scanResult,
+        riskLevel,
+      ]
+    );
+
+    res.render("scan-result", {
+      user: req.session.user,
+      file: req.file,
+      md5Hash,
+      sha1Hash,
+      sha256Hash,
+      scanResult,
+      riskLevel,
+    });
+  } catch (err) {
+    console.error("SCAN ERROR:", err);
+
+    res.status(500).send(`
+      <h1>Scan Error</h1>
+      <p>${err.message}</p>
+      <a href="/dashboard">Back to Dashboard</a>
+    `);
+  }
+});
+
 // URL scan route
 router.post("/scan-url", isAuthenticated, async (req, res) => {
   try {
@@ -336,6 +485,7 @@ router.post("/scan-url", isAuthenticated, async (req, res) => {
     });
   } catch (err) {
     console.error("URL SCAN ERROR:", err);
+
     res.status(500).send(`
       <h1>URL Scan Error</h1>
       <p>${err.message}</p>
@@ -344,39 +494,17 @@ router.post("/scan-url", isAuthenticated, async (req, res) => {
   }
 });
 
-
-// Detect search type
-function detectSearchType(query) {
-  const cleanQuery = query.trim();
-
-  const md5Regex = /^[a-fA-F0-9]{32}$/;
-  const sha1Regex = /^[a-fA-F0-9]{40}$/;
-  const sha256Regex = /^[a-fA-F0-9]{64}$/;
-  const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-
-  if (sha256Regex.test(cleanQuery)) return "SHA-256 Hash";
-  if (sha1Regex.test(cleanQuery)) return "SHA-1 Hash";
-  if (md5Regex.test(cleanQuery)) return "MD5 Hash";
-  if (ipRegex.test(cleanQuery)) return "IP Address";
-
-  try {
-    const parsed = new URL(cleanQuery);
-    return "URL";
-  } catch (error) {
-    return "Domain";
-  }
-}
-
-// Search route
-// Search route
+// Search route with RDAP lookup for domain, URL, and IP
 router.post("/search", isAuthenticated, async (req, res) => {
   try {
-    const { query } = req.body;
+    const query = req.body.query.trim();
     const searchType = detectSearchType(query);
 
     let fileResults = [];
     let urlResults = [];
+    let whoisResult = null;
 
+    // HASH SEARCH
     if (
       searchType === "MD5 Hash" ||
       searchType === "SHA-1 Hash" ||
@@ -391,21 +519,29 @@ router.post("/search", isAuthenticated, async (req, res) => {
       );
 
       fileResults = files;
-    } 
-    
+    }
+
+    // URL SEARCH
     else if (searchType === "URL") {
+      const domainName = cleanWhoisTarget(query);
+
       const [urls] = await db.query(
         `SELECT * FROM url_scans
          WHERE url = ?
+         OR domain LIKE ?
+         OR url LIKE ?
          ORDER BY scanned_at DESC
-         LIMIT 1`,
-        [query]
+         LIMIT 5`,
+        [query, `%${domainName}%`, `%${domainName}%`]
       );
 
       urlResults = urls;
-    } 
-    
+    }
+
+    // DOMAIN SEARCH
     else if (searchType === "Domain") {
+      const domainName = cleanWhoisTarget(query);
+
       const [urls] = await db.query(
         `SELECT u.*
          FROM url_scans u
@@ -413,15 +549,17 @@ router.post("/search", isAuthenticated, async (req, res) => {
            SELECT url, MAX(id) AS latest_id
            FROM url_scans
            WHERE domain LIKE ?
+           OR url LIKE ?
            GROUP BY url
          ) latest ON u.id = latest.latest_id
          ORDER BY u.scanned_at DESC`,
-        [`%${query}%`]
+        [`%${domainName}%`, `%${domainName}%`]
       );
 
       urlResults = urls;
-    } 
-    
+    }
+
+    // IP ADDRESS SEARCH
     else if (searchType === "IP Address") {
       const [urls] = await db.query(
         `SELECT u.*
@@ -429,7 +567,8 @@ router.post("/search", isAuthenticated, async (req, res) => {
          INNER JOIN (
            SELECT url, MAX(id) AS latest_id
            FROM url_scans
-           WHERE domain = ? OR url LIKE ?
+           WHERE domain = ?
+           OR url LIKE ?
            GROUP BY url
          ) latest ON u.id = latest.latest_id
          ORDER BY u.scanned_at DESC`,
@@ -439,14 +578,56 @@ router.post("/search", isAuthenticated, async (req, res) => {
       urlResults = urls;
     }
 
+    // RDAP / WHOIS LOOKUP FOR URL / DOMAIN / IP ONLY
+    if (
+      searchType === "URL" ||
+      searchType === "Domain" ||
+      searchType === "IP Address"
+    ) {
+      const rdapTarget = cleanWhoisTarget(query);
+      const rdapData = await getRdapResult(rdapTarget, searchType);
+
+      console.log("RDAP TARGET:", rdapTarget);
+      console.log("RDAP RESULT:", rdapData.rawData);
+
+      whoisResult = {
+        domain: rdapTarget,
+        registrar: rdapData.registrar,
+        creationDate: rdapData.creationDate,
+        expiryDate: rdapData.expiryDate,
+        updatedDate: rdapData.updatedDate,
+        nameServers: rdapData.nameServers,
+        status: rdapData.status,
+        rawData: rdapData.rawData,
+      };
+
+      await db.query(
+        `INSERT INTO whois_lookups
+        (user_id, query, domain, registrar, creation_date, expiry_date, updated_date, name_servers, status, raw_data)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          req.session.user.id,
+          query,
+          rdapTarget,
+          whoisResult.registrar,
+          whoisResult.creationDate,
+          whoisResult.expiryDate,
+          whoisResult.updatedDate,
+          whoisResult.nameServers,
+          whoisResult.status,
+          JSON.stringify(whoisResult.rawData, null, 2),
+        ]
+      );
+    }
+
     res.render("search-result", {
       user: req.session.user,
       query,
       searchType,
       fileResults,
       urlResults,
+      whoisResult,
     });
-
   } catch (err) {
     console.error("SEARCH ERROR:", err);
 
@@ -457,3 +638,34 @@ router.post("/search", isAuthenticated, async (req, res) => {
     `);
   }
 });
+
+// Scan history page
+router.get("/history", isAuthenticated, async (req, res) => {
+  try {
+    const [fileScans] = await db.query(
+      "SELECT * FROM scans WHERE user_id = ? ORDER BY scanned_at DESC",
+      [req.session.user.id]
+    );
+
+    const [urlScans] = await db.query(
+      "SELECT * FROM url_scans WHERE user_id = ? ORDER BY scanned_at DESC",
+      [req.session.user.id]
+    );
+
+    res.render("history", {
+      user: req.session.user,
+      fileScans,
+      urlScans,
+    });
+  } catch (err) {
+    console.error("HISTORY ERROR:", err);
+
+    res.status(500).send(`
+      <h1>History Error</h1>
+      <p>${err.message}</p>
+      <a href="/dashboard">Back to Dashboard</a>
+    `);
+  }
+});
+
+module.exports = router;
