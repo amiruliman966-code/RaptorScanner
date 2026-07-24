@@ -1,262 +1,351 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scan History - RaptorScanner</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-  <nav class="navbar">
+  <nav class="navbar" id="dashboardNavbar">
     <div class="logo">RaptorScanner</div>
+
+    <button class="nav-toggle" id="navToggle">☰</button>
 
     <div class="nav-links">
       <a href="/">Home</a>
       <a href="/dashboard">Dashboard</a>
       <a href="/history">Scan History</a>
+      <a href="/profile">Profile</a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/admin">Admin</a>
+      <% } %>
+
       <a href="/logout">Logout</a>
       <button id="themeToggle" class="theme-btn">🌙</button>
     </div>
   </nav>
 
-  <div class="history-container">
-    <h1>Scan History</h1>
-    <p class="subtitle">View your previous file and URL scan results.</p>
+  <main class="history-container">
 
-    <div class="history-tabs">
-      <button class="history-tab-btn active" onclick="showHistoryTab('fileHistory', this)">
-        File History
-      </button>
-      <button class="history-tab-btn" onclick="showHistoryTab('urlHistory', this)">
-        URL History
-      </button>
+    <div class="history-header">
+      <h1>Scan History</h1>
+      <p>View your previous file and URL scan records.</p>
     </div>
 
-    <!-- FILE HISTORY -->
-    <div id="fileHistory" class="history-tab-content active">
-      <h2>File Scan History</h2>
+    <div class="history-card">
 
-      <% if (fileScans.length === 0) { %>
-        <div class="card">
-          <p>No file scan history found.</p>
+      <div class="history-tabs">
+        <button type="button" class="history-tab-btn active" onclick="showHistoryTab('file')">
+          File History
+        </button>
+
+        <button type="button" class="history-tab-btn" onclick="showHistoryTab('url')">
+          URL History
+        </button>
+      </div>
+
+      <!-- DATATABLE STYLE TOP CONTROL -->
+      <div class="datatable-top">
+        <div class="entries-control">
+          <select id="entriesPerPage" onchange="changeEntriesPerPage()">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          <span>entries per page</span>
         </div>
-      <% } else { %>
+
+        <div class="search-control">
+          <label for="historySearch">Search:</label>
+          <input 
+            type="text" 
+            id="historySearch" 
+            onkeyup="searchHistoryTable()"
+          >
+        </div>
+      </div>
+
+      <!-- FILE HISTORY -->
+      <section id="fileHistoryTab" class="history-tab-content active">
         <div class="table-wrapper">
-          <table id="fileHistoryTable">
+          <table id="fileHistoryTable" class="history-table datatable-style">
             <thead>
               <tr>
-                <th>No.</th>
+                <th>No</th>
                 <th>File Name</th>
                 <th>File Size</th>
-                <th>Status</th>
+                <th>Scan Result</th>
                 <th>Risk Level</th>
-                <th>Scanned At</th>
+                <th>MD5</th>
+                <th>SHA-1</th>
+                <th>SHA-256</th>
+                <th>Date</th>
               </tr>
             </thead>
 
             <tbody>
-              <% fileScans.forEach((scan, index) => { %>
-                <tr>
-                  <td><%= index + 1 %></td>
-                  <td><%= scan.original_name %></td>
-                  <td><%= (scan.file_size / 1024).toFixed(2) %> KB</td>
-                  <td><%= scan.scan_result %></td>
-
-                  <td>
-                    <% if (scan.risk_level === "High") { %>
-                      <span class="badge high">High</span>
-                    <% } else if (scan.risk_level === "Medium") { %>
-                      <span class="badge medium">Medium</span>
-                    <% } else { %>
-                      <span class="badge low">Low</span>
-                    <% } %>
-                  </td>
-
-                  <td><%= new Date(scan.scanned_at).toLocaleString() %></td>
+              <% if (!fileScans || fileScans.length === 0) { %>
+                <tr class="empty-row">
+                  <td colspan="9">No file scan history found.</td>
                 </tr>
-              <% }) %>
+              <% } else { %>
+                <% fileScans.forEach((scan, index) => { %>
+                  <tr class="history-data-row">
+                    <td><%= index + 1 %></td>
+                    <td class="break-text"><%= scan.original_name %></td>
+                    <td><%= (scan.file_size / 1024).toFixed(2) %> KB</td>
+                    <td><%= scan.scan_result %></td>
+
+                    <td>
+                      <% if (scan.risk_level === "High") { %>
+                        <span class="badge high">High</span>
+                      <% } else if (scan.risk_level === "Medium") { %>
+                        <span class="badge medium">Medium</span>
+                      <% } else { %>
+                        <span class="badge low">Low</span>
+                      <% } %>
+                    </td>
+
+                    <td class="break-text"><%= scan.md5_hash %></td>
+                    <td class="break-text"><%= scan.sha1_hash %></td>
+                    <td class="break-text"><%= scan.sha256_hash %></td>
+                    <td><%= new Date(scan.scanned_at).toLocaleString() %></td>
+                  </tr>
+                <% }) %>
+              <% } %>
             </tbody>
           </table>
         </div>
+      </section>
 
-        <div class="pagination-footer">
-          <div id="fileHistoryInfo" class="pagination-info"></div>
-          <div id="fileHistoryPagination" class="pagination-buttons"></div>
-        </div>
-      <% } %>
-    </div>
-
-    <!-- URL HISTORY -->
-    <div id="urlHistory" class="history-tab-content">
-      <h2>URL Scan History</h2>
-
-      <% if (urlScans.length === 0) { %>
-        <div class="card">
-          <p>No URL scan history found.</p>
-        </div>
-      <% } else { %>
+      <!-- URL HISTORY -->
+      <section id="urlHistoryTab" class="history-tab-content">
         <div class="table-wrapper">
-          <table id="urlHistoryTable" class="url-history-table">
+          <table id="urlHistoryTable" class="history-table datatable-style">
             <thead>
               <tr>
-                <th class="no-col">No.</th>
-                <th class="url-col">URL</th>
-                <th class="domain-col">Domain</th>
-                <th class="status-col">Status</th>
-                <th class="risk-col">Risk Level</th>
-                <th class="date-col">Scanned At</th>
+                <th>No</th>
+                <th>URL</th>
+                <th>Domain</th>
+                <th>Protocol</th>
+                <th>Status</th>
+                <th>Risk Level</th>
+                <th>Reason</th>
+                <th>Date</th>
               </tr>
             </thead>
 
             <tbody>
-              <% urlScans.forEach((scan, index) => { %>
-                <tr>
-                  <td><%= index + 1 %></td>
-
-                  <td class="url-cell">
-                    <%= scan.url %>
-                  </td>
-
-                  <td class="domain-cell">
-                    <%= scan.domain %>
-                  </td>
-
-                  <td>
-                    <%= scan.scan_result %>
-                  </td>
-
-                  <td>
-                    <% if (scan.risk_level === "High") { %>
-                      <span class="badge high">High</span>
-                    <% } else if (scan.risk_level === "Medium") { %>
-                      <span class="badge medium">Medium</span>
-                    <% } else { %>
-                      <span class="badge low">Low</span>
-                    <% } %>
-                  </td>
-
-                  <td>
-                    <%= new Date(scan.scanned_at).toLocaleString() %>
-                  </td>
+              <% if (!urlScans || urlScans.length === 0) { %>
+                <tr class="empty-row">
+                  <td colspan="8">No URL scan history found.</td>
                 </tr>
-              <% }) %>
+              <% } else { %>
+                <% urlScans.forEach((scan, index) => { %>
+                  <tr class="history-data-row">
+                    <td><%= index + 1 %></td>
+                    <td class="break-text"><%= scan.url %></td>
+                    <td class="break-text"><%= scan.domain %></td>
+                    <td><%= scan.protocol %></td>
+                    <td><%= scan.scan_result %></td>
+
+                    <td>
+                      <% if (scan.risk_level === "High") { %>
+                        <span class="badge high">High</span>
+                      <% } else if (scan.risk_level === "Medium") { %>
+                        <span class="badge medium">Medium</span>
+                      <% } else { %>
+                        <span class="badge low">Low</span>
+                      <% } %>
+                    </td>
+
+                    <td class="break-text"><%= scan.reason %></td>
+                    <td><%= new Date(scan.scanned_at).toLocaleString() %></td>
+                  </tr>
+                <% }) %>
+              <% } %>
             </tbody>
           </table>
         </div>
+      </section>
 
-        <div class="pagination-footer">
-          <div id="urlHistoryInfo" class="pagination-info"></div>
-          <div id="urlHistoryPagination" class="pagination-buttons"></div>
-        </div>
-      <% } %>
+      <!-- DATATABLE STYLE BOTTOM -->
+      <div class="datatable-bottom">
+        <p id="paginationInfo" class="pagination-info">
+          Showing 0 to 0 of 0 entries
+        </p>
+
+        <div id="paginationNumbers" class="pagination-numbers"></div>
+      </div>
+
+      <!-- PRINT BUTTON UNDER -->
+      <div class="history-actions history-actions-under">
+        <button type="button" onclick="window.print()" class="print-btn">
+          Print
+        </button>
+
+        <a href="/dashboard" class="btn">Back to Dashboard</a>
+      </div>
+
     </div>
 
-    <div class="button-area">
-      <a class="btn" href="/dashboard">Back to Dashboard</a>
-    </div>
-  </div>
+  </main>
 
   <script>
-    function showHistoryTab(tabId, button) {
-      const contents = document.querySelectorAll(".history-tab-content");
-      const buttons = document.querySelectorAll(".history-tab-btn");
+    let activeHistoryType = "file";
+    let rowsPerPage = 10;
+    let currentPage = 1;
 
-      contents.forEach(content => content.classList.remove("active"));
-      buttons.forEach(btn => btn.classList.remove("active"));
+    function getActiveTable() {
+      if (activeHistoryType === "file") {
+        return document.getElementById("fileHistoryTable");
+      }
 
-      document.getElementById(tabId).classList.add("active");
-      button.classList.add("active");
+      return document.getElementById("urlHistoryTable");
     }
 
-    function setupPagination(tableId, infoId, paginationId, rowsPerPage = 10) {
-      const table = document.getElementById(tableId);
+    function showHistoryTab(type) {
+      activeHistoryType = type;
+      currentPage = 1;
+
+      const fileTab = document.getElementById("fileHistoryTab");
+      const urlTab = document.getElementById("urlHistoryTab");
+      const buttons = document.querySelectorAll(".history-tab-btn");
+
+      fileTab.classList.remove("active");
+      urlTab.classList.remove("active");
+
+      buttons.forEach((btn) => btn.classList.remove("active"));
+
+      if (type === "file") {
+        fileTab.classList.add("active");
+        buttons[0].classList.add("active");
+      } else {
+        urlTab.classList.add("active");
+        buttons[1].classList.add("active");
+      }
+
+      document.getElementById("historySearch").value = "";
+      updateHistoryTable();
+    }
+
+    function changeEntriesPerPage() {
+      rowsPerPage = Number(document.getElementById("entriesPerPage").value);
+      currentPage = 1;
+      updateHistoryTable();
+    }
+
+    function searchHistoryTable() {
+      currentPage = 1;
+      updateHistoryTable();
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      updateHistoryTable();
+    }
+
+    function updateHistoryTable() {
+      const table = getActiveTable();
+      const info = document.getElementById("paginationInfo");
+      const paginationNumbers = document.getElementById("paginationNumbers");
+      const searchValue = document.getElementById("historySearch").value.toLowerCase();
 
       if (!table) return;
 
-      const rows = Array.from(table.querySelectorAll("tbody tr"));
-      const infoBox = document.getElementById(infoId);
-      const paginationBox = document.getElementById(paginationId);
+      const rows = Array.from(table.querySelectorAll("tbody .history-data-row"));
 
-      let currentPage = 1;
-      const totalRows = rows.length;
-      const totalPages = Math.ceil(totalRows / rowsPerPage);
+      const filteredRows = rows.filter((row) => {
+        return row.textContent.toLowerCase().includes(searchValue);
+      });
 
-      function showPage(page) {
-        currentPage = page;
+      rows.forEach((row) => {
+        row.style.display = "none";
+      });
 
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
+      const totalEntries = filteredRows.length;
+      const totalPages = Math.ceil(totalEntries / rowsPerPage);
 
-        rows.forEach((row, index) => {
-          row.style.display = index >= start && index < end ? "" : "none";
-        });
+      if (currentPage < 1) currentPage = 1;
+      if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
 
-        const showingStart = totalRows === 0 ? 0 : start + 1;
-        const showingEnd = Math.min(end, totalRows);
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const endIndex = startIndex + rowsPerPage;
 
-        infoBox.textContent = `Showing ${showingStart} to ${showingEnd} of ${totalRows} entries`;
+      const rowsToShow = filteredRows.slice(startIndex, endIndex);
 
-        renderButtons();
+      rowsToShow.forEach((row) => {
+        row.style.display = "";
+      });
+
+      if (totalEntries === 0) {
+        info.textContent = "Showing 0 to 0 of 0 entries";
+        paginationNumbers.innerHTML = "";
+        return;
       }
 
-      function renderButtons() {
-        paginationBox.innerHTML = "";
+      const showingStart = startIndex + 1;
+      const showingEnd = Math.min(endIndex, totalEntries);
 
-        const firstBtn = createButton("«", 1, currentPage === 1);
-        const prevBtn = createButton("‹", currentPage - 1, currentPage === 1);
+      info.textContent =
+        "Showing " +
+        showingStart +
+        " to " +
+        showingEnd +
+        " of " +
+        totalEntries +
+        " entries";
 
-        paginationBox.appendChild(firstBtn);
-        paginationBox.appendChild(prevBtn);
+      buildPagination(totalPages);
+    }
 
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + 4);
+    function buildPagination(totalPages) {
+      const paginationNumbers = document.getElementById("paginationNumbers");
+      paginationNumbers.innerHTML = "";
 
-        if (endPage - startPage < 4) {
-          startPage = Math.max(1, endPage - 4);
+      const firstBtn = document.createElement("button");
+      firstBtn.textContent = "«";
+      firstBtn.disabled = currentPage === 1;
+      firstBtn.onclick = () => goToPage(1);
+      paginationNumbers.appendChild(firstBtn);
+
+      const prevBtn = document.createElement("button");
+      prevBtn.textContent = "‹";
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => goToPage(currentPage - 1);
+      paginationNumbers.appendChild(prevBtn);
+
+      for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement("button");
+        pageBtn.textContent = i;
+
+        if (i === currentPage) {
+          pageBtn.classList.add("active");
         }
 
-        for (let i = startPage; i <= endPage; i++) {
-          const btn = createButton(i, i, false);
-
-          if (i === currentPage) {
-            btn.classList.add("active");
-          }
-
-          paginationBox.appendChild(btn);
-        }
-
-        const nextBtn = createButton("›", currentPage + 1, currentPage === totalPages);
-        const lastBtn = createButton("»", totalPages, currentPage === totalPages);
-
-        paginationBox.appendChild(nextBtn);
-        paginationBox.appendChild(lastBtn);
+        pageBtn.onclick = () => goToPage(i);
+        paginationNumbers.appendChild(pageBtn);
       }
 
-      function createButton(text, page, disabled) {
-        const button = document.createElement("button");
-        button.textContent = text;
-        button.className = "page-btn";
+      const nextBtn = document.createElement("button");
+      nextBtn.textContent = "›";
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => goToPage(currentPage + 1);
+      paginationNumbers.appendChild(nextBtn);
 
-        if (disabled) {
-          button.disabled = true;
-        }
-
-        button.addEventListener("click", () => {
-          if (!disabled) {
-            showPage(page);
-          }
-        });
-
-        return button;
-      }
-
-      if (totalRows > 0) {
-        showPage(1);
-      }
+      const lastBtn = document.createElement("button");
+      lastBtn.textContent = "»";
+      lastBtn.disabled = currentPage === totalPages;
+      lastBtn.onclick = () => goToPage(totalPages);
+      paginationNumbers.appendChild(lastBtn);
     }
 
     window.addEventListener("load", function () {
-      setupPagination("fileHistoryTable", "fileHistoryInfo", "fileHistoryPagination", 10);
-      setupPagination("urlHistoryTable", "urlHistoryInfo", "urlHistoryPagination", 10);
+      updateHistoryTable();
     });
   </script>
 

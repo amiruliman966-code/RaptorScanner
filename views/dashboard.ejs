@@ -17,11 +17,17 @@
       <a href="/">Home</a>
       <a href="/dashboard">Dashboard</a>
       <a href="/history">Scan History</a>
+      <a href="/profile">Profile</a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/admin">Admin</a>
+      <% } %>
+
       <a href="/logout">Logout</a>
       <button id="themeToggle" class="theme-btn">🌙</button>
     </div>
   </nav>
-
+<%- include("partials/admin-content") %>
   <main class="vt-page">
     <div class="vt-card">
 
@@ -56,7 +62,7 @@
       <!-- SEARCH TAB -->
       <div id="searchTab" class="tab-content">
         <h1>Search Threat Data</h1>
-        <p>Search hash, domain, IP address, or URL from your scan history.</p>
+        <p>Search hash, domain, IP address, or URL from your scan history and WHOIS/RDAP lookup.</p>
 
         <form action="/search" method="POST">
           <input type="text" name="query" placeholder="Hash, domain, IP address, or URL" required>

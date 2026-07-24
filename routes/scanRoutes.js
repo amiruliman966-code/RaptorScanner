@@ -290,23 +290,162 @@ function getRdapEntityName(data) {
   return "Not available";
 }
 
+// Find RDAP entity by role
+function findEntityByRole(entities, role) {
+  if (!entities || entities.length === 0) {
+    return null;
+  }
+
+  for (const entity of entities) {
+    if (entity.roles && entity.roles.includes(role)) {
+      return entity;
+    }
+
+    if (entity.entities) {
+      const found = findEntityByRole(entity.entities, role);
+
+      if (found) {
+        return found;
+      }
+    }
+  }
+
+  return null;
+}
+
+// Get vCard value
+function getVcardValue(entity, key) {
+  if (!entity || !entity.vcardArray || !entity.vcardArray[1]) {
+    return "Not available";
+  }
+
+  const vcard = entity.vcardArray[1];
+  const item = vcard.find((row) => row[0] === key);
+
+  if (!item) {
+    return "Not available";
+  }
+
+  if (Array.isArray(item[3])) {
+    return item[3].filter(Boolean).join(", ");
+  }
+
+  return item[3] || "Not available";
+}
+
+// Get vCard address
+function getVcardAddress(entity) {
+  const emptyAddress = {
+    street: "Not available",
+    city: "Not available",
+    state: "Not available",
+    postalCode: "Not available",
+    country: "Not available",
+  };
+
+  if (!entity || !entity.vcardArray || !entity.vcardArray[1]) {
+    return emptyAddress;
+  }
+
+  const vcard = entity.vcardArray[1];
+  const adr = vcard.find((row) => row[0] === "adr");
+
+  if (!adr || !Array.isArray(adr[3])) {
+    return emptyAddress;
+  }
+
+  const address = adr[3];
+
+  return {
+    street: Array.isArray(address[2])
+      ? address[2].join(", ")
+      : address[2] || "Not available",
+    city: address[3] || "Not available",
+    state: address[4] || "Not available",
+    postalCode: address[5] || "Not available",
+    country: address[6] || "Not available",
+  };
+}
+
+// Get phone by type
+function getPhoneByType(entity, typeName) {
+  if (!entity || !entity.vcardArray || !entity.vcardArray[1]) {
+    return "Not available";
+  }
+
+  const vcard = entity.vcardArray[1];
+
+  const phone = vcard.find((row) => {
+    if (row[0] !== "tel") return false;
+
+    const params = row[1];
+
+    if (!params || !params.type) return false;
+
+    if (Array.isArray(params.type)) {
+      return params.type.includes(typeName);
+    }
+
+    return params.type === typeName;
+  });
+
+  return phone ? phone[3] : "Not available";
+}
+
+// Get public ID
+function getPublicId(entity, typeName) {
+  if (!entity || !entity.publicIds) {
+    return "Not available";
+  }
+
+  const publicId = entity.publicIds.find((item) => item.type === typeName);
+
+  return publicId ? publicId.identifier : "Not available";
+}
+
+// Build registrar information
+function buildRegistrarInfo(data) {
+  const registrarEntity = findEntityByRole(data.entities, "registrar");
+  const abuseEntity = findEntityByRole(data.entities, "abuse");
+
+  return {
+    registrar: getRdapEntityName(data),
+    ianaId: getPublicId(registrarEntity, "IANA Registrar ID"),
+    email: getVcardValue(registrarEntity, "email"),
+    abuseEmail: getVcardValue(abuseEntity, "email"),
+    abusePhone: getPhoneByType(abuseEntity, "voice"),
+  };
+}
+
+// Build registrant contact
+function buildRegistrantContact(data) {
+  const registrantEntity = findEntityByRole(data.entities, "registrant");
+  const address = getVcardAddress(registrantEntity);
+
+  return {
+    name: getVcardValue(registrantEntity, "fn"),
+    organization: getVcardValue(registrantEntity, "org"),
+    street: address.street,
+    city: address.city,
+    state: address.state,
+    postalCode: address.postalCode,
+    country: address.country,
+    phone: getPhoneByType(registrantEntity, "voice"),
+    fax: getPhoneByType(registrantEntity, "fax"),
+    email: getVcardValue(registrantEntity, "email"),
+  };
+}
+
 // RDAP lookup for .com, .my, domain, and IP
 async function getRdapResult(target, searchType) {
   try {
     let rdapUrl = "";
 
-    // IP address lookup
     if (searchType === "IP Address") {
       rdapUrl = `https://rdap.org/ip/${target}`;
-    }
-
-    // Malaysia domains: .my, .edu.my, .com.my, .net.my, etc.
-    else if (target.endsWith(".my")) {
+    } else if (target.endsWith(".my")) {
       rdapUrl = `https://rdap.mynic.my/rdap/domain/${target}`;
-    }
-
-    // Other domains: .com, .org, .net, etc.
-    else {
+    } else {
       rdapUrl = `https://rdap.org/domain/${target}`;
     }
 
@@ -329,7 +468,6 @@ async function getRdapResult(target, searchType) {
     let nameServers = "Not available";
     let status = "Not available";
 
-    // Get dates
     if (data.events && data.events.length > 0) {
       data.events.forEach((event) => {
         if (event.eventAction === "registration") {
@@ -349,7 +487,6 @@ async function getRdapResult(target, searchType) {
       });
     }
 
-    // Get name servers
     if (data.nameservers && data.nameservers.length > 0) {
       nameServers = data.nameservers
         .map((ns) => ns.ldhName || ns.unicodeName)
@@ -357,12 +494,10 @@ async function getRdapResult(target, searchType) {
         .join(", ");
     }
 
-    // For IP address, show IP range instead of name server
     if (searchType === "IP Address" && data.startAddress && data.endAddress) {
       nameServers = `${data.startAddress} - ${data.endAddress}`;
     }
 
-    // Get status
     if (data.status && data.status.length > 0) {
       status = data.status.join(", ");
     }
@@ -494,7 +629,7 @@ router.post("/scan-url", isAuthenticated, async (req, res) => {
   }
 });
 
-// Search route with RDAP lookup for domain, URL, and IP
+// Search route with RDAP / WHOIS lookup
 router.post("/search", isAuthenticated, async (req, res) => {
   try {
     const query = req.body.query.trim();
@@ -504,7 +639,6 @@ router.post("/search", isAuthenticated, async (req, res) => {
     let urlResults = [];
     let whoisResult = null;
 
-    // HASH SEARCH
     if (
       searchType === "MD5 Hash" ||
       searchType === "SHA-1 Hash" ||
@@ -519,10 +653,7 @@ router.post("/search", isAuthenticated, async (req, res) => {
       );
 
       fileResults = files;
-    }
-
-    // URL SEARCH
-    else if (searchType === "URL") {
+    } else if (searchType === "URL") {
       const domainName = cleanWhoisTarget(query);
 
       const [urls] = await db.query(
@@ -536,10 +667,7 @@ router.post("/search", isAuthenticated, async (req, res) => {
       );
 
       urlResults = urls;
-    }
-
-    // DOMAIN SEARCH
-    else if (searchType === "Domain") {
+    } else if (searchType === "Domain") {
       const domainName = cleanWhoisTarget(query);
 
       const [urls] = await db.query(
@@ -557,10 +685,7 @@ router.post("/search", isAuthenticated, async (req, res) => {
       );
 
       urlResults = urls;
-    }
-
-    // IP ADDRESS SEARCH
-    else if (searchType === "IP Address") {
+    } else if (searchType === "IP Address") {
       const [urls] = await db.query(
         `SELECT u.*
          FROM url_scans u
@@ -578,7 +703,6 @@ router.post("/search", isAuthenticated, async (req, res) => {
       urlResults = urls;
     }
 
-    // RDAP / WHOIS LOOKUP FOR URL / DOMAIN / IP ONLY
     if (
       searchType === "URL" ||
       searchType === "Domain" ||
@@ -599,25 +723,31 @@ router.post("/search", isAuthenticated, async (req, res) => {
         nameServers: rdapData.nameServers,
         status: rdapData.status,
         rawData: rdapData.rawData,
+        registrarInfo: buildRegistrarInfo(rdapData.rawData),
+        registrantContact: buildRegistrantContact(rdapData.rawData),
       };
 
-      await db.query(
-        `INSERT INTO whois_lookups
-        (user_id, query, domain, registrar, creation_date, expiry_date, updated_date, name_servers, status, raw_data)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          req.session.user.id,
-          query,
-          rdapTarget,
-          whoisResult.registrar,
-          whoisResult.creationDate,
-          whoisResult.expiryDate,
-          whoisResult.updatedDate,
-          whoisResult.nameServers,
-          whoisResult.status,
-          JSON.stringify(whoisResult.rawData, null, 2),
-        ]
-      );
+      try {
+        await db.query(
+          `INSERT INTO whois_lookups
+          (user_id, query, domain, registrar, creation_date, expiry_date, updated_date, name_servers, status, raw_data)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            req.session.user.id,
+            query,
+            rdapTarget,
+            whoisResult.registrar,
+            whoisResult.creationDate,
+            whoisResult.expiryDate,
+            whoisResult.updatedDate,
+            whoisResult.nameServers,
+            whoisResult.status,
+            JSON.stringify(whoisResult.rawData, null, 2),
+          ]
+        );
+      } catch (dbErr) {
+        console.error("WHOIS SAVE ERROR:", dbErr.message);
+      }
     }
 
     res.render("search-result", {

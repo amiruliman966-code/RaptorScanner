@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar" id="dashboardNavbar">
+    <div class="logo">RaptorScanner</div>
+
+    <button class="nav-toggle" id="navToggle">☰</button>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">Scan History</a>
+      <a href="/profile">Profile</a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/admin">Admin</a>
+      <% } %>
+
+      <a href="/logout">Logout</a>
+      <button id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <main class="profile-page">
+
+    <section class="profile-header-card">
+      <div class="profile-picture-box">
+        <% if (profileUser.profile_picture) { %>
+          <img src="<%= profileUser.profile_picture %>" alt="Profile Picture">
+        <% } else { %>
+          <div class="profile-default-icon">
+            <%= profileUser.name ? profileUser.name.charAt(0).toUpperCase() : "U" %>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="profile-info">
+        <h1><%= profileUser.name %></h1>
+        <p><%= profileUser.email %></p>
+
+        <% if (profileUser.role === "admin") { %>
+          <span class="admin-role-badge">Admin</span>
+        <% } else { %>
+          <span class="user-role-badge">User</span>
+        <% } %>
+      </div>
+    </section>
+
+    <% if (error) { %>
+      <p class="error profile-message"><%= error %></p>
+    <% } %>
+
+    <% if (success) { %>
+      <p class="success profile-message"><%= success %></p>
+    <% } %>
+
+    <section class="profile-grid">
+
+      <!-- UPDATE PROFILE -->
+      <div class="profile-card">
+        <h2>Edit Profile</h2>
+
+        <form action="/profile/update" method="POST" enctype="multipart/form-data">
+          <label>Full Name</label>
+          <input 
+            type="text" 
+            name="name" 
+            value="<%= profileUser.name %>" 
+            required
+          >
+
+          <label>Email Address</label>
+          <input 
+            type="email" 
+            value="<%= profileUser.email %>" 
+            disabled
+          >
+
+          <small>Email cannot be changed.</small>
+
+          <label>Phone Number</label>
+          <input 
+            type="text" 
+            name="phone" 
+            placeholder="Example: 0123456789"
+            value="<%= profileUser.phone || "" %>"
+          >
+
+          <label>Profile Picture</label>
+          <input 
+            type="file" 
+            name="profile_picture" 
+            accept="image/*"
+          >
+
+          <button type="submit">Update Profile</button>
+        </form>
+      </div>
+
+      <!-- ACCOUNT DETAILS -->
+      <div class="profile-card">
+        <h2>Account Details</h2>
+
+        <div class="profile-detail-row">
+          <span>Name</span>
+          <p><%= profileUser.name %></p>
+        </div>
+
+        <div class="profile-detail-row">
+          <span>Email</span>
+          <p class="break-text"><%= profileUser.email %></p>
+        </div>
+
+        <div class="profile-detail-row">
+          <span>Phone</span>
+          <p><%= profileUser.phone || "Not added" %></p>
+        </div>
+
+        <div class="profile-detail-row">
+          <span>Login Type</span>
+          <p><%= profileUser.auth_provider || "local" %></p>
+        </div>
+
+        <div class="profile-detail-row">
+          <span>Role</span>
+          <p><%= profileUser.role || "user" %></p>
+        </div>
+
+        <div class="profile-detail-row">
+          <span>Joined Date</span>
+          <p><%= new Date(profileUser.created_at).toLocaleString() %></p>
+        </div>
+      </div>
+
+      <!-- CHANGE PASSWORD -->
+      <div class="profile-card profile-card-full">
+        <h2>Change Password</h2>
+
+        <% if (profileUser.password === "GOOGLE_LOGIN") { %>
+          <p>This account uses Google login. Password cannot be changed here.</p>
+        <% } else { %>
+          <form action="/profile/change-password" method="POST">
+            <label>Current Password</label>
+            <input 
+              type="password" 
+              name="currentPassword" 
+              placeholder="Current password"
+              required
+            >
+
+            <label>New Password</label>
+            <input 
+              type="password" 
+              name="newPassword" 
+              placeholder="New password"
+              required
+            >
+
+            <label>Confirm New Password</label>
+            <input 
+              type="password" 
+              name="confirmPassword" 
+              placeholder="Confirm new password"
+              required
+            >
+
+            <button type="submit">Change Password</button>
+          </form>
+        <% } %>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="/theme.js"></script>
+</body>
+</html>

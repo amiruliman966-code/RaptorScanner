@@ -17,6 +17,11 @@
       <a href="/">Home</a>
       <a href="/dashboard">Dashboard</a>
       <a href="/history">Scan History</a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/admin">Admin</a>
+      <% } %>
+
       <a href="/logout">Logout</a>
       <button id="themeToggle" class="theme-btn">🌙</button>
     </div>
@@ -26,7 +31,7 @@
 
     <div class="advanced-result-header">
       <h1>Search Analysis Result</h1>
-      <p>Advanced threat lookup from your local RaptorScanner database.</p>
+      <p>Advanced threat lookup from your local RaptorScanner database and WHOIS/RDAP.</p>
     </div>
 
     <div class="result-overview-card">
@@ -41,8 +46,14 @@
       </div>
     </div>
 
-    <!-- WHOIS RESULT ONLY FOR URL / DOMAIN / IP -->
+    <!-- WHOIS / RDAP RESULT -->
     <% if (typeof whoisResult !== "undefined" && whoisResult) { %>
+
+      <% 
+        const registrarInfo = whoisResult.registrarInfo || {};
+        const registrantContact = whoisResult.registrantContact || {};
+      %>
+
       <section class="advanced-card">
         <h2>WHOIS Lookup Result</h2>
 
@@ -74,27 +85,111 @@
 
           <div>
             <span class="result-label">Status</span>
-            <p class="break-text">
-              <% if (Array.isArray(whoisResult.status)) { %>
-                <%= whoisResult.status.join(", ") %>
-              <% } else { %>
-                <%= whoisResult.status %>
-              <% } %>
-            </p>
+            <p class="break-text"><%= whoisResult.status %></p>
           </div>
 
           <div>
-            <span class="result-label">Name Servers</span>
-            <p class="break-text">
-              <% if (Array.isArray(whoisResult.nameServers)) { %>
-                <%= whoisResult.nameServers.join(", ") %>
-              <% } else { %>
-                <%= whoisResult.nameServers %>
-              <% } %>
-            </p>
+            <span class="result-label">Name Servers / IP Range</span>
+            <p class="break-text"><%= whoisResult.nameServers %></p>
           </div>
         </div>
       </section>
+
+      <!-- REGISTRAR INFORMATION -->
+      <section class="advanced-card whois-info-card">
+        <div class="whois-section-title">
+          <span class="whois-icon">Ⓡ</span>
+          <h2>Registrar Information</h2>
+        </div>
+
+        <div class="whois-info-table">
+          <div class="whois-row">
+            <span>Registrar:</span>
+            <p><%= registrarInfo.registrar || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>IANA ID:</span>
+            <p><%= registrarInfo.ianaId || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Email:</span>
+            <p class="break-text"><%= registrarInfo.email || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Abuse Email:</span>
+            <p class="break-text"><%= registrarInfo.abuseEmail || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Abuse Phone:</span>
+            <p><%= registrarInfo.abusePhone || "Not available" %></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- REGISTRANT CONTACT -->
+      <section class="advanced-card whois-info-card">
+        <div class="whois-section-title">
+          <span class="whois-icon">♙</span>
+          <h2>Registrant Contact</h2>
+        </div>
+
+        <div class="whois-info-table">
+          <div class="whois-row">
+            <span>Name:</span>
+            <p><%= registrantContact.name || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Organization:</span>
+            <p><%= registrantContact.organization || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Street:</span>
+            <p><%= registrantContact.street || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>City:</span>
+            <p><%= registrantContact.city || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>State:</span>
+            <p><%= registrantContact.state || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Postal Code:</span>
+            <p><%= registrantContact.postalCode || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Country:</span>
+            <p><%= registrantContact.country || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Phone:</span>
+            <p><%= registrantContact.phone || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Fax:</span>
+            <p><%= registrantContact.fax || "Not available" %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Email:</span>
+            <p class="break-text"><%= registrantContact.email || "Not available" %></p>
+          </div>
+        </div>
+      </section>
+
     <% } %>
 
     <% 
