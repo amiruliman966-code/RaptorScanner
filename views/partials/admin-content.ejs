@@ -1,0 +1,23 @@
+<% if (typeof adminContents !== "undefined" && adminContents.length > 0) { %>
+  <div class="admin-public-content-area">
+    <% adminContents.forEach((content) => { %>
+      <div class="admin-public-content-card">
+        <% if (content.image_path) { %>
+          <img 
+            src="<%= content.image_path %>" 
+            alt="Admin Announcement"
+            class="admin-public-content-image"
+          >
+        <% } %>
+
+        <% if (content.title) { %>
+          <h3><%= content.title %></h3>
+        <% } %>
+
+        <% if (content.message) { %>
+          <p><%= content.message %></p>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+<% } %>

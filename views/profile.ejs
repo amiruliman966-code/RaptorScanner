@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar" id="dashboardNavbar">
+
+    <div class="nav-left">
+      <a href="/profile" class="navbar-profile-link" title="Open Profile">
+        <% 
+          let profilePic = null;
+
+          if (user && user.profile_picture) {
+            if (user.profile_picture.startsWith("/")) {
+              profilePic = user.profile_picture;
+            } else if (user.profile_picture.startsWith("uploads/")) {
+              profilePic = "/" + user.profile_picture;
+            } else {
+              profilePic = "/uploads/" + user.profile_picture;
+            }
+          }
+        %>
+
+        <% if (profilePic) { %>
+          <img src="<%= profilePic %>" alt="Profile" class="navbar-profile-img">
+        <% } else { %>
+          <div class="navbar-profile-initial">
+            <%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %>
+          </div>
+        <% } %>
+      </a>
+
+      <div class="logo">RaptorScanner</div>
+    </div>
+
+    <button type="button" class="nav-toggle" id="navToggle">☰</button>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">Scan History</a>
+      <a href="/profile">Profile</a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/admin">Admin</a>
+      <% } %>
+
+      <a href="/logout">Logout</a>
+      <button type="button" id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <main class="profile-page">
+
+    <% if (typeof error !== "undefined" && error) { %>
+      <p class="error profile-message"><%= error %></p>
+    <% } %>
+
+    <% if (typeof success !== "undefined" && success) { %>
+      <p class="success profile-message"><%= success %></p>
+    <% } %>
+
+    <section class="profile-header-card">
+      <div class="profile-picture-box">
+        <% if (profilePic) { %>
+          <img src="<%= profilePic %>" alt="Profile Picture">
+        <% } else { %>
+          <div class="profile-default-icon">
+            <%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="profile-info">
+        <h1><%= user && user.name ? user.name : "User" %></h1>
+        <p><%= user && user.email ? user.email : "" %></p>
+
+        <% if (user && user.role === "admin") { %>
+          <span class="admin-role-badge">Admin</span>
+        <% } else { %>
+          <span class="user-role-badge">User</span>
+        <% } %>
+      </div>
+    </section>
+
+    <section class="profile-grid">
+
+      <div class="profile-card">
+        <h2>Update Profile</h2>
+
+        <form action="/profile/update" method="POST">
+          <label>Full Name</label>
+          <input type="text" name="name" value="<%= user && user.name ? user.name : "" %>" required>
+
+          <label>Email Address</label>
+          <input type="email" value="<%= user && user.email ? user.email : "" %>" disabled>
+
+          <label>Phone Number</label>
+          <input type="text" name="phone" value="<%= user && user.phone ? user.phone : "" %>" placeholder="Enter phone number">
+
+          <button type="submit">Update Profile</button>
+        </form>
+      </div>
+
+      <div class="profile-card">
+        <h2>Profile Picture</h2>
+
+        <form action="/profile/picture" method="POST" enctype="multipart/form-data">
+          <label>Upload New Picture</label>
+          <input type="file" name="profile_picture" accept="image/*" required>
+
+          <small>Recommended: square image, JPG or PNG.</small>
+
+          <button type="submit">Upload Picture</button>
+        </form>
+      </div>
+
+      <div class="profile-card profile-card-full">
+        <h2>Account Details</h2>
+
+        <div class="profile-detail-row">
+          <span>Name</span>
+          <p><%= user && user.name ? user.name : "Not available" %></p>
+        </div>
+
+        <div class="profile-detail-row">
+          <span>Email</span>
+          <p><%= user && user.email ? user.email : "Not available" %></p>
+        </div>
+
+        <div class="profile-detail-row">
+          <span>Phone</span>
+          <p><%= user && user.phone ? user.phone : "Not added" %></p>
+        </div>
+
+        <div class="profile-detail-row">
+          <span>Role</span>
+          <p><%= user && user.role ? user.role : "user" %></p>
+        </div>
+      </div>
+
+      <div class="profile-card profile-card-full">
+        <h2>Change Password</h2>
+
+        <form action="/profile/change-password" method="POST">
+          <label>Current Password</label>
+          <input type="password" name="currentPassword" placeholder="Current password" required>
+
+          <label>New Password</label>
+          <input type="password" name="newPassword" placeholder="New password" required>
+
+          <label>Confirm New Password</label>
+          <input type="password" name="confirmPassword" placeholder="Confirm new password" required>
+
+          <button type="submit">Change Password</button>
+        </form>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="/theme.js"></script>
+</body>
+</html>

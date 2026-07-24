@@ -1,0 +1,16 @@
+node_modules/
+.env
+
+uploads/
+public/uploads/
+
+*.log
+npm-debug.log*
+
+raptorscanner
+raptorscanner.pub
+*.pem
+*.key
+*.p8
+
+config/AuthKey_*.p8

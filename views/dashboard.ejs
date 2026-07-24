@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<nav class="navbar" id="dashboardNavbar">
+
+  <div class="nav-left">
+    <a href="/profile" class="navbar-profile-link" title="Open Profile">
+      <% 
+        let profilePic = null;
+
+        if (user && user.profile_picture) {
+          if (user.profile_picture.startsWith("/")) {
+            profilePic = user.profile_picture;
+          } else if (user.profile_picture.startsWith("uploads/")) {
+            profilePic = "/" + user.profile_picture;
+          } else {
+            profilePic = "/uploads/" + user.profile_picture;
+          }
+        }
+      %>
+
+      <% if (profilePic) { %>
+        <img src="<%= profilePic %>" alt="Profile" class="navbar-profile-img">
+      <% } else { %>
+        <div class="navbar-profile-initial">
+          <%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %>
+        </div>
+      <% } %>
+    </a>
+
+    <div class="logo">RaptorScanner</div>
+  </div>
+
+  <button type="button" class="nav-toggle" id="navToggle">☰</button>
+
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/history">Scan History</a>
+    <a href="/profile">Profile</a>
+
+    <% if (user && user.role === "admin") { %>
+      <a href="/admin">Admin</a>
+    <% } %>
+
+    <a href="/logout">Logout</a>
+    <button type="button" id="themeToggle" class="theme-btn">🌙</button>
+  </div>
+</nav>
+
+        <% if (profilePic) { %>
+          <img src="<%= profilePic %>" alt="Profile" class="navbar-profile-img">
+        <% } else { %>
+          <div class="navbar-profile-initial">
+            <%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %>
+          </div>
+        <% } %>
+      </a>
+
+      <div class="logo">RaptorScanner</div>
+    </div>
+
+    <button type="button" class="nav-toggle" id="navToggle">☰</button>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">Scan History</a>
+      <a href="/profile">Profile</a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/admin">Admin</a>
+      <% } %>
+
+      <a href="/logout">Logout</a>
+      <button type="button" id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <main class="vt-page">
+    <div class="vt-card">
+
+      <div class="vt-tabs">
+        <button class="tab-btn active" onclick="showTab('fileTab', 'file')">FILE</button>
+        <button class="tab-btn" onclick="showTab('urlTab', 'url')">URL</button>
+        <button class="tab-btn" onclick="showTab('searchTab', 'search')">SEARCH</button>
+      </div>
+
+      <div id="fileTab" class="tab-content active">
+        <h1>Upload and Scan File</h1>
+        <p>Scan files using hash generation and ClamAV malware scanning.</p>
+
+        <form action="/scan" method="POST" enctype="multipart/form-data">
+          <input type="file" name="file" required>
+          <button type="submit">Scan File</button>
+        </form>
+      </div>
+
+      <div id="urlTab" class="tab-content">
+        <h1>Scan URL</h1>
+        <p>Check whether a URL looks suspicious before visiting it.</p>
+
+        <form action="/scan-url" method="POST">
+          <input type="url" name="url" placeholder="https://example.com" required>
+          <button type="submit">Scan URL</button>
+        </form>
+      </div>
+
+      <div id="searchTab" class="tab-content">
+        <h1>Search Threat Data</h1>
+        <p>Search hash, domain, IP address, or URL from your scan history.</p>
+
+        <form action="/search" method="POST">
+          <input type="text" name="query" placeholder="Hash, domain, IP address, or URL" required>
+          <button type="submit">Search</button>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    function showTab(tabId, tabName) {
+      const tabs = document.querySelectorAll(".tab-content");
+      const buttons = document.querySelectorAll(".tab-btn");
+
+      tabs.forEach(tab => tab.classList.remove("active"));
+      buttons.forEach(btn => btn.classList.remove("active"));
+
+      document.getElementById(tabId).classList.add("active");
+
+      if (tabName === "file") {
+        buttons[0].classList.add("active");
+      } else if (tabName === "url") {
+        buttons[1].classList.add("active");
+      } else if (tabName === "search") {
+        buttons[2].classList.add("active");
+      }
+
+      localStorage.setItem("activeTab", tabName);
+    }
+
+    window.addEventListener("load", function () {
+      const savedTab = localStorage.getItem("activeTab") || "file";
+
+      if (savedTab === "url") {
+        showTab("urlTab", "url");
+      } else if (savedTab === "search") {
+        showTab("searchTab", "search");
+      } else {
+        showTab("fileTab", "file");
+      }
+    });
+  </script>
+
+  <script src="/theme.js"></script>
+</body>
+</html>

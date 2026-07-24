@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Result - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar" id="dashboardNavbar">
+
+    <div class="nav-left">
+      <a href="/profile" class="navbar-profile-link" title="Open Profile">
+        <% 
+          let profilePic = null;
+
+          if (user && user.profile_picture) {
+            if (user.profile_picture.startsWith("/")) {
+              profilePic = user.profile_picture;
+            } else if (user.profile_picture.startsWith("uploads/")) {
+              profilePic = "/" + user.profile_picture;
+            } else {
+              profilePic = "/uploads/" + user.profile_picture;
+            }
+          }
+        %>
+
+        <% if (profilePic) { %>
+          <img src="<%= profilePic %>" alt="Profile" class="navbar-profile-img">
+        <% } else { %>
+          <div class="navbar-profile-initial">
+            <%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %>
+          </div>
+        <% } %>
+      </a>
+
+      <div class="logo">RaptorScanner</div>
+    </div>
+
+    <button type="button" class="nav-toggle" id="navToggle">☰</button>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">Scan History</a>
+      <a href="/profile">Profile</a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/admin">Admin</a>
+      <% } %>
+
+      <a href="/logout">Logout</a>
+      <button type="button" id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <main class="advanced-result-page">
+
+    <div class="advanced-result-header">
+      <h1>Search Analysis Result</h1>
+      <p>Advanced threat lookup from your local RaptorScanner database.</p>
+    </div>
+
+    <div class="result-overview-card">
+      <div>
+        <span class="result-label">Search Query</span>
+        <h2><%= query %></h2>
+      </div>
+
+      <div>
+        <span class="result-label">Detected Type</span>
+        <h2><%= searchType %></h2>
+      </div>
+    </div>
+
+    <% if (typeof whoisResult !== "undefined" && whoisResult) { %>
+      <section class="advanced-card whois-info-card">
+        <div class="whois-section-title">
+          <span class="whois-icon">ⓘ</span>
+          <h2>WHOIS Lookup Result</h2>
+        </div>
+
+        <div class="whois-info-table">
+          <div class="whois-row">
+            <span>Target:</span>
+            <p><%= whoisResult.domain %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Registrar / Organization:</span>
+            <p><%= whoisResult.registrar %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Creation Date:</span>
+            <p><%= whoisResult.creationDate %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Expiry Date:</span>
+            <p><%= whoisResult.expiryDate %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Updated Date:</span>
+            <p><%= whoisResult.updatedDate %></p>
+          </div>
+
+          <div class="whois-row">
+            <span>Status:</span>
+            <p>
+              <% if (Array.isArray(whoisResult.status)) { %>
+                <%= whoisResult.status.join(", ") %>
+              <% } else { %>
+                <%= whoisResult.status %>
+              <% } %>
+            </p>
+          </div>
+
+          <div class="whois-row">
+            <span>Name Servers:</span>
+            <p>
+              <% if (Array.isArray(whoisResult.nameServers)) { %>
+                <%= whoisResult.nameServers.join(", ") %>
+              <% } else { %>
+                <%= whoisResult.nameServers %>
+              <% } %>
+            </p>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <% 
+      let totalResults = 0;
+
+      if (
+        searchType === "MD5 Hash" ||
+        searchType === "SHA-1 Hash" ||
+        searchType === "SHA-256 Hash"
+      ) {
+        totalResults = fileResults ? fileResults.length : 0;
+      } else {
+        totalResults = urlResults ? urlResults.length : 0;
+      }
+    %>
+
+    <div class="summary-grid">
+      <div class="summary-box">
+        <h3><%= totalResults %></h3>
+        <p>Total Result Found</p>
+      </div>
+
+      <div class="summary-box">
+        <h3>Local DB</h3>
+        <p>Search Source</p>
+      </div>
+
+      <div class="summary-box">
+        <h3><%= searchType %></h3>
+        <p>Threat Data Type</p>
+      </div>
+    </div>
+
+    <% if (
+      searchType === "MD5 Hash" ||
+      searchType === "SHA-1 Hash" ||
+      searchType === "SHA-256 Hash"
+    ) { %>
+
+      <section class="advanced-card">
+        <h2>File Intelligence Result</h2>
+
+        <% if (!fileResults || fileResults.length === 0) { %>
+          <div class="empty-result">
+            <h3>No File Result Found</h3>
+            <p>This hash does not exist in your local scan database.</p>
+          </div>
+        <% } else { %>
+
+          <% fileResults.forEach((file, index) => { %>
+            <div class="advanced-result-item">
+
+              <div class="result-item-header">
+                <h3>File Result #<%= index + 1 %></h3>
+
+                <% if (file.risk_level === "High") { %>
+                  <span class="badge high">High Risk</span>
+                <% } else if (file.risk_level === "Medium") { %>
+                  <span class="badge medium">Medium Risk</span>
+                <% } else { %>
+                  <span class="badge low">Low Risk</span>
+                <% } %>
+              </div>
+
+              <div class="details-grid">
+                <div>
+                  <span class="result-label">File Name</span>
+                  <p><%= file.original_name %></p>
+                </div>
+
+                <div>
+                  <span class="result-label">File Size</span>
+                  <p><%= (file.file_size / 1024).toFixed(2) %> KB</p>
+                </div>
+
+                <div>
+                  <span class="result-label">Scan Result</span>
+                  <p><%= file.scan_result %></p>
+                </div>
+
+                <div>
+                  <span class="result-label">Risk Level</span>
+                  <p><%= file.risk_level %></p>
+                </div>
+              </div>
+
+              <div class="hash-section">
+                <h4>Hash Values</h4>
+
+                <div class="hash-row">
+                  <span>MD5</span>
+                  <code><%= file.md5_hash %></code>
+                  <button onclick="copyText('<%= file.md5_hash %>')">Copy</button>
+                </div>
+
+                <div class="hash-row">
+                  <span>SHA-1</span>
+                  <code><%= file.sha1_hash %></code>
+                  <button onclick="copyText('<%= file.sha1_hash %>')">Copy</button>
+                </div>
+
+                <div class="hash-row">
+                  <span>SHA-256</span>
+                  <code><%= file.sha256_hash %></code>
+                  <button onclick="copyText('<%= file.sha256_hash %>')">Copy</button>
+                </div>
+              </div>
+
+            </div>
+          <% }) %>
+
+        <% } %>
+      </section>
+
+    <% } else { %>
+
+      <section class="advanced-card">
+        <h2>URL / Domain / IP Intelligence Result</h2>
+
+        <% if (!urlResults || urlResults.length === 0) { %>
+          <div class="empty-result">
+            <h3>No URL, Domain, or IP Result Found</h3>
+            <p>This search query does not exist in your local URL scan database.</p>
+          </div>
+        <% } else { %>
+
+          <% urlResults.forEach((item, index) => { %>
+            <div class="advanced-result-item">
+
+              <div class="result-item-header">
+                <h3>URL Result #<%= index + 1 %></h3>
+
+                <% if (item.risk_level === "High") { %>
+                  <span class="badge high">High Risk</span>
+                <% } else if (item.risk_level === "Medium") { %>
+                  <span class="badge medium">Medium Risk</span>
+                <% } else { %>
+                  <span class="badge low">Low Risk</span>
+                <% } %>
+              </div>
+
+              <div class="details-grid">
+                <div>
+                  <span class="result-label">URL</span>
+                  <p class="break-text"><%= item.url %></p>
+                </div>
+
+                <div>
+                  <span class="result-label">Domain</span>
+                  <p class="break-text"><%= item.domain %></p>
+                </div>
+
+                <div>
+                  <span class="result-label">Protocol</span>
+                  <p><%= item.protocol %></p>
+                </div>
+
+                <div>
+                  <span class="result-label">Status</span>
+                  <p><%= item.scan_result %></p>
+                </div>
+
+                <div>
+                  <span class="result-label">Risk Level</span>
+                  <p><%= item.risk_level %></p>
+                </div>
+
+                <div>
+                  <span class="result-label">Reason</span>
+                  <p><%= item.reason %></p>
+                </div>
+              </div>
+
+            </div>
+          <% }) %>
+
+        <% } %>
+      </section>
+
+    <% } %>
+
+    <div class="result-actions">
+      <a class="btn" href="/dashboard">Back to Dashboard</a>
+      <a class="btn" href="/history">View Scan History</a>
+    </div>
+
+  </main>
+
+  <script>
+    function copyText(text) {
+      navigator.clipboard.writeText(text);
+      alert("Copied to clipboard");
+    }
+  </script>
+
+  <script src="/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar" id="dashboardNavbar">
+    <div class="logo">RaptorScanner Admin</div>
+
+    <button class="nav-toggle" id="navToggle">☰</button>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">Scan History</a>
+      <a href="/admin">Admin</a>
+      <a href="/logout">Logout</a>
+      <button id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <main class="admin-page">
+
+    <div class="admin-header">
+      <h1>Admin Dashboard</h1>
+      <p>Welcome, <strong><%= user.name %></strong>. Manage and monitor RaptorScanner activity.</p>
+    </div>
+
+    <div class="admin-summary-grid">
+      <div class="admin-summary-card">
+        <h2><%= totalUsers %></h2>
+        <p>Total Users</p>
+      </div>
+
+      <div class="admin-summary-card">
+        <h2><%= totalFileScans %></h2>
+        <p>Total File Scans</p>
+      </div>
+
+      <div class="admin-summary-card">
+        <h2><%= totalUrlScans %></h2>
+        <p>Total URL Scans</p>
+      </div>
+
+      <div class="admin-summary-card">
+        <h2><%= totalWhoisLookups %></h2>
+        <p>Total WHOIS Lookups</p>
+      </div>
+    </div>
+
+    <section class="admin-card">
+      <h2>Recent Users</h2>
+
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Registered At</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% if (recentUsers.length === 0) { %>
+              <tr>
+                <td colspan="5">No users found.</td>
+              </tr>
+            <% } else { %>
+              <% recentUsers.forEach((item, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><%= item.name %></td>
+                  <td><%= item.email %></td>
+                  <td>
+                    <% if (item.role === "admin") { %>
+                      <span class="badge high">Admin</span>
+                    <% } else { %>
+                      <span class="badge low">User</span>
+                    <% } %>
+                  </td>
+                  <td><%= item.created_at ? item.created_at.toLocaleString() : "-" %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-card">
+      <h2>Recent File Scans</h2>
+
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>User</th>
+              <th>File Name</th>
+              <th>Scan Result</th>
+              <th>Risk</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% if (recentFileScans.length === 0) { %>
+              <tr>
+                <td colspan="6">No file scans found.</td>
+              </tr>
+            <% } else { %>
+              <% recentFileScans.forEach((item, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><%= item.user_name %><br><small><%= item.user_email %></small></td>
+                  <td><%= item.original_name %></td>
+                  <td><%= item.scan_result %></td>
+                  <td>
+                    <% if (item.risk_level === "High") { %>
+                      <span class="badge high">High</span>
+                    <% } else if (item.risk_level === "Medium") { %>
+                      <span class="badge medium">Medium</span>
+                    <% } else { %>
+                      <span class="badge low">Low</span>
+                    <% } %>
+                  </td>
+                  <td><%= item.scanned_at ? item.scanned_at.toLocaleString() : "-" %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-card">
+      <h2>Recent URL Scans</h2>
+
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>User</th>
+              <th>URL</th>
+              <th>Domain</th>
+              <th>Status</th>
+              <th>Risk</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% if (recentUrlScans.length === 0) { %>
+              <tr>
+                <td colspan="7">No URL scans found.</td>
+              </tr>
+            <% } else { %>
+              <% recentUrlScans.forEach((item, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><%= item.user_name %><br><small><%= item.user_email %></small></td>
+                  <td class="break-text"><%= item.url %></td>
+                  <td class="break-text"><%= item.domain %></td>
+                  <td><%= item.scan_result %></td>
+                  <td>
+                    <% if (item.risk_level === "High") { %>
+                      <span class="badge high">High</span>
+                    <% } else if (item.risk_level === "Medium") { %>
+                      <span class="badge medium">Medium</span>
+                    <% } else { %>
+                      <span class="badge low">Low</span>
+                    <% } %>
+                  </td>
+                  <td><%= item.scanned_at ? item.scanned_at.toLocaleString() : "-" %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/theme.js"></script>
+</body>
+</html>

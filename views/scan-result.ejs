@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Scan Result - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar" id="dashboardNavbar">
+
+    <div class="nav-left">
+      <a href="/profile" class="navbar-profile-link" title="Open Profile">
+        <% 
+          let profilePic = null;
+
+          if (user && user.profile_picture) {
+            if (user.profile_picture.startsWith("/")) {
+              profilePic = user.profile_picture;
+            } else if (user.profile_picture.startsWith("uploads/")) {
+              profilePic = "/" + user.profile_picture;
+            } else {
+              profilePic = "/uploads/" + user.profile_picture;
+            }
+          }
+        %>
+
+        <% if (profilePic) { %>
+          <img src="<%= profilePic %>" alt="Profile" class="navbar-profile-img">
+        <% } else { %>
+          <div class="navbar-profile-initial">
+            <%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %>
+          </div>
+        <% } %>
+      </a>
+
+      <div class="logo">RaptorScanner</div>
+    </div>
+
+    <button type="button" class="nav-toggle" id="navToggle">☰</button>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">Scan History</a>
+      <a href="/profile">Profile</a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/admin">Admin</a>
+      <% } %>
+
+      <a href="/logout">Logout</a>
+      <button type="button" id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <% 
+    const scanData = typeof scan !== "undefined" && scan ? scan : {};
+    const resultFileName =
+      scanData.original_name ||
+      (typeof originalName !== "undefined" ? originalName : "Uploaded File");
+
+    const resultFileSize =
+      scanData.file_size ||
+      (typeof fileSize !== "undefined" ? fileSize : 0);
+
+    const resultScan =
+      scanData.scan_result ||
+      (typeof scanResult !== "undefined" ? scanResult : "Unknown");
+
+    const resultRisk =
+      scanData.risk_level ||
+      (typeof riskLevel !== "undefined" ? riskLevel : "Low");
+
+    const resultMd5 =
+      scanData.md5_hash ||
+      (typeof md5Hash !== "undefined" ? md5Hash : "Not available");
+
+    const resultSha1 =
+      scanData.sha1_hash ||
+      (typeof sha1Hash !== "undefined" ? sha1Hash : "Not available");
+
+    const resultSha256 =
+      scanData.sha256_hash ||
+      (typeof sha256Hash !== "undefined" ? sha256Hash : "Not available");
+  %>
+
+  <main class="result-container">
+    <h1>File Scan Result</h1>
+
+    <div class="card">
+      <h2>File Information</h2>
+
+      <p><strong>File Name:</strong> <%= resultFileName %></p>
+      <p><strong>File Size:</strong> <%= (Number(resultFileSize) / 1024).toFixed(2) %> KB</p>
+      <p><strong>Scan Result:</strong> <%= resultScan %></p>
+
+      <p>
+        <strong>Risk Level:</strong>
+
+        <% if (resultRisk === "High") { %>
+          <span class="badge high">High</span>
+        <% } else if (resultRisk === "Medium") { %>
+          <span class="badge medium">Medium</span>
+        <% } else { %>
+          <span class="badge low">Low</span>
+        <% } %>
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Hash Values</h2>
+
+      <p><strong>MD5:</strong></p>
+      <div class="hash"><%= resultMd5 %></div>
+
+      <p><strong>SHA-1:</strong></p>
+      <div class="hash"><%= resultSha1 %></div>
+
+      <p><strong>SHA-256:</strong></p>
+      <div class="hash"><%= resultSha256 %></div>
+    </div>
+
+    <div class="result-actions">
+      <a href="/dashboard" class="btn">Back to Dashboard</a>
+      <a href="/history" class="btn">View Scan History</a>
+    </div>
+  </main>
+
+  <script src="/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scan History - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <nav class="navbar" id="dashboardNavbar">
+
+    <div class="nav-left">
+      <a href="/profile" class="navbar-profile-link" title="Open Profile">
+        <% 
+          let profilePic = null;
+
+          if (user && user.profile_picture) {
+            if (user.profile_picture.startsWith("/")) {
+              profilePic = user.profile_picture;
+            } else if (user.profile_picture.startsWith("uploads/")) {
+              profilePic = "/" + user.profile_picture;
+            } else {
+              profilePic = "/uploads/" + user.profile_picture;
+            }
+          }
+        %>
+
+        <% if (profilePic) { %>
+          <img src="<%= profilePic %>" alt="Profile" class="navbar-profile-img">
+        <% } else { %>
+          <div class="navbar-profile-initial">
+            <%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %>
+          </div>
+        <% } %>
+      </a>
+
+      <div class="logo">RaptorScanner</div>
+    </div>
+
+    <button type="button" class="nav-toggle" id="navToggle">☰</button>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/history">Scan History</a>
+      <a href="/profile">Profile</a>
+
+      <% if (user && user.role === "admin") { %>
+        <a href="/admin">Admin</a>
+      <% } %>
+
+      <a href="/logout">Logout</a>
+      <button type="button" id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <main class="history-container">
+    <h1>Scan History</h1>
+    <p>View your previous file and URL scan results.</p>
+
+    <div class="history-tabs">
+      <button class="history-tab-btn active" onclick="showHistoryTab('fileHistory', this)">File History</button>
+      <button class="history-tab-btn" onclick="showHistoryTab('urlHistory', this)">URL History</button>
+    </div>
+
+    <section id="fileHistory" class="history-tab-content active">
+      <div class="datatable-top">
+        <div class="entries-control">
+          <select id="fileEntriesSelect" onchange="changeEntries('file')">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          <span>entries per page</span>
+        </div>
+
+        <div class="search-control">
+          <label>Search:</label>
+          <input type="text" id="fileSearchInput" onkeyup="searchTable('file')" placeholder="Search file history">
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="datatable-style" id="fileHistoryTable">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>File Name</th>
+              <th>File Size</th>
+              <th>Scan Result</th>
+              <th>Risk Level</th>
+              <th>MD5</th>
+              <th>SHA-1</th>
+              <th>SHA-256</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% if (!fileScans || fileScans.length === 0) { %>
+              <tr>
+                <td colspan="9">No file scan history found.</td>
+              </tr>
+            <% } else { %>
+              <% fileScans.forEach((file, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td class="break-text"><%= file.original_name %></td>
+                  <td><%= (file.file_size / 1024).toFixed(2) %> KB</td>
+                  <td><%= file.scan_result %></td>
+                  <td>
+                    <% if (file.risk_level === "High") { %>
+                      <span class="badge high">High</span>
+                    <% } else if (file.risk_level === "Medium") { %>
+                      <span class="badge medium">Medium</span>
+                    <% } else { %>
+                      <span class="badge low">Low</span>
+                    <% } %>
+                  </td>
+                  <td class="break-text"><%= file.md5_hash %></td>
+                  <td class="break-text"><%= file.sha1_hash %></td>
+                  <td class="break-text"><%= file.sha256_hash %></td>
+                  <td><%= new Date(file.scanned_at).toLocaleString() %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="datatable-bottom">
+        <p class="pagination-info" id="filePaginationInfo">Showing file entries</p>
+
+        <div class="pagination-numbers">
+          <button onclick="previousPage('file')">‹</button>
+          <button class="active" id="filePageNumber">1</button>
+          <button onclick="nextPage('file')">›</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="urlHistory" class="history-tab-content">
+      <div class="datatable-top">
+        <div class="entries-control">
+          <select id="urlEntriesSelect" onchange="changeEntries('url')">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+          <span>entries per page</span>
+        </div>
+
+        <div class="search-control">
+          <label>Search:</label>
+          <input type="text" id="urlSearchInput" onkeyup="searchTable('url')" placeholder="Search URL history">
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="datatable-style url-history-table" id="urlHistoryTable">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>URL</th>
+              <th>Domain</th>
+              <th>Protocol</th>
+              <th>Status</th>
+              <th>Risk Level</th>
+              <th>Reason</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% if (!urlScans || urlScans.length === 0) { %>
+              <tr>
+                <td colspan="8">No URL scan history found.</td>
+              </tr>
+            <% } else { %>
+              <% urlScans.forEach((item, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td class="break-text"><%= item.url %></td>
+                  <td class="break-text"><%= item.domain %></td>
+                  <td><%= item.protocol %></td>
+                  <td><%= item.scan_result %></td>
+                  <td>
+                    <% if (item.risk_level === "High") { %>
+                      <span class="badge high">High</span>
+                    <% } else if (item.risk_level === "Medium") { %>
+                      <span class="badge medium">Medium</span>
+                    <% } else { %>
+                      <span class="badge low">Low</span>
+                    <% } %>
+                  </td>
+                  <td class="break-text"><%= item.reason %></td>
+                  <td><%= new Date(item.scanned_at).toLocaleString() %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="datatable-bottom">
+        <p class="pagination-info" id="urlPaginationInfo">Showing URL entries</p>
+
+        <div class="pagination-numbers">
+          <button onclick="previousPage('url')">‹</button>
+          <button class="active" id="urlPageNumber">1</button>
+          <button onclick="nextPage('url')">›</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="history-actions-under">
+      <button class="print-btn" onclick="window.print()">Print History</button>
+      <a href="/dashboard" class="btn">Back to Dashboard</a>
+    </div>
+  </main>
+
+  <script>
+    const tableState = {
+      file: {
+        currentPage: 1,
+        entries: 10,
+        tableId: "fileHistoryTable",
+        searchInputId: "fileSearchInput",
+        entriesSelectId: "fileEntriesSelect",
+        pageNumberId: "filePageNumber",
+        paginationInfoId: "filePaginationInfo"
+      },
+      url: {
+        currentPage: 1,
+        entries: 10,
+        tableId: "urlHistoryTable",
+        searchInputId: "urlSearchInput",
+        entriesSelectId: "urlEntriesSelect",
+        pageNumberId: "urlPageNumber",
+        paginationInfoId: "urlPaginationInfo"
+      }
+    };
+
+    function showHistoryTab(tabId, button) {
+      document.querySelectorAll(".history-tab-content").forEach(tab => {
+        tab.classList.remove("active");
+      });
+
+      document.querySelectorAll(".history-tab-btn").forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+      document.getElementById(tabId).classList.add("active");
+      button.classList.add("active");
+    }
+
+    function getVisibleRows(type) {
+      const state = tableState[type];
+      const table = document.getElementById(state.tableId);
+      const searchValue = document.getElementById(state.searchInputId).value.toLowerCase();
+      const rows = Array.from(table.querySelectorAll("tbody tr"));
+
+      return rows.filter(row => {
+        return row.innerText.toLowerCase().includes(searchValue);
+      });
+    }
+
+    function updateTable(type) {
+      const state = tableState[type];
+      const table = document.getElementById(state.tableId);
+      const rows = Array.from(table.querySelectorAll("tbody tr"));
+      const visibleRows = getVisibleRows(type);
+
+      rows.forEach(row => {
+        row.style.display = "none";
+      });
+
+      const start = (state.currentPage - 1) * state.entries;
+      const end = start + state.entries;
+
+      visibleRows.slice(start, end).forEach(row => {
+        row.style.display = "";
+      });
+
+      const total = visibleRows.length;
+      const showingStart = total === 0 ? 0 : start + 1;
+      const showingEnd = Math.min(end, total);
+
+      document.getElementById(state.pageNumberId).textContent = state.currentPage;
+      document.getElementById(state.paginationInfoId).textContent =
+        `Showing ${showingStart} to ${showingEnd} of ${total} entries`;
+    }
+
+    function changeEntries(type) {
+      const state = tableState[type];
+      state.entries = Number(document.getElementById(state.entriesSelectId).value);
+      state.currentPage = 1;
+      updateTable(type);
+    }
+
+    function searchTable(type) {
+      tableState[type].currentPage = 1;
+      updateTable(type);
+    }
+
+    function nextPage(type) {
+      const state = tableState[type];
+      const visibleRows = getVisibleRows(type);
+      const maxPage = Math.ceil(visibleRows.length / state.entries);
+
+      if (state.currentPage < maxPage) {
+        state.currentPage++;
+        updateTable(type);
+      }
+    }
+
+    function previousPage(type) {
+      const state = tableState[type];
+
+      if (state.currentPage > 1) {
+        state.currentPage--;
+        updateTable(type);
+      }
+    }
+
+    window.addEventListener("load", function () {
+      updateTable("file");
+      updateTable("url");
+    });
+  </script>
+
+  <script src="/theme.js"></script>
+</body>
+</html>
+

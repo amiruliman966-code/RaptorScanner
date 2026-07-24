@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Register - RaptorScanner</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar login-navbar" id="loginNavbar">
+    <div class="logo">RaptorScanner</div>
+
+    <button type="button" class="nav-toggle" id="navToggle">☰</button>
+
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/login">Login</a>
+      <a href="/register">Sign Up</a>
+      <button type="button" id="themeToggle" class="theme-btn">🌙</button>
+    </div>
+  </nav>
+
+  <!-- Register Page -->
+  <main class="fb-login-page">
+
+    <!-- Left Side Branding -->
+    <section class="login-brand">
+      <div class="logo-badge">🛡️</div>
+
+      <h1>RaptorScanner</h1>
+
+      <p>
+        Create an account to scan files, check URLs, generate hashes, and view
+        simple malware risk reports before opening suspicious files.
+      </p>
+    </section>
+
+    <!-- Right Side Register Box -->
+    <section class="login-box">
+      <h2>Create RaptorScanner Account</h2>
+
+      <% if (error) { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+
+      <% if (success) { %>
+        <p class="success"><%= success %></p>
+      <% } %>
+
+      <form action="/register" method="POST">
+        <input 
+          type="text" 
+          name="name" 
+          placeholder="Full Name" 
+          required
+        >
+
+        <input 
+          type="email" 
+          name="email" 
+          placeholder="Email address" 
+          required
+        >
+
+        <input 
+          type="password" 
+          name="password" 
+          placeholder="Password" 
+          required
+        >
+
+        <button type="submit">Sign Up</button>
+      </form>
+
+      <div class="divider">
+        <span>or sign up with</span>
+      </div>
+
+      <div class="social-login">
+        <a href="/auth/google" class="social-btn google">G</a>
+      </div>
+
+      <a href="/login" class="create-account-btn">
+        Already have an account? Login
+      </a>
+    </section>
+
+  </main>
+
+  <script src="/theme.js"></script>
+</body>
+</html>
