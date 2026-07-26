@@ -196,6 +196,30 @@
     </div>
   </footer>
 
+  <button
+    id="homeBackToTop"
+    class="home-back-to-top"
+    type="button"
+    aria-label="Back to top"
+    title="Back to top"
+  >
+    <span aria-hidden="true">&uarr;</span>
+  </button>
+
   <script src="/theme.js"></script>
+  <script>
+    const homeBackToTop = document.getElementById("homeBackToTop");
+
+    const updateBackToTopVisibility = () => {
+      homeBackToTop.classList.toggle("is-visible", window.scrollY > 500);
+    };
+
+    window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
+    updateBackToTopVisibility();
+
+    homeBackToTop.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  </script>
 </body>
 </html>
