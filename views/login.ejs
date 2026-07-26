@@ -74,13 +74,13 @@
             aria-pressed="false"
             data-login-password-toggle
           >
-            <svg data-eye-closed viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="login-eye-closed" data-eye-closed viewBox="0 0 24 24" aria-hidden="true">
               <path d="M3 3l18 18"></path>
               <path d="M10.6 10.7a2 2 0 0 0 2.7 2.7"></path>
               <path d="M9.9 4.2A10.7 10.7 0 0 1 12 4c5.5 0 9 8 9 8a16.8 16.8 0 0 1-2.1 3.2"></path>
               <path d="M6.6 6.6C4.2 8.2 3 12 3 12s3.5 8 9 8a9.7 9.7 0 0 0 4.1-.9"></path>
             </svg>
-            <svg data-eye-open viewBox="0 0 24 24" aria-hidden="true" hidden>
+            <svg class="login-eye-open" data-eye-open viewBox="0 0 24 24" aria-hidden="true">
               <path d="M3 12s3.5-8 9-8 9 8 9 8-3.5 8-9 8-9-8-9-8z"></path>
               <circle cx="12" cy="12" r="2.5"></circle>
             </svg>
@@ -125,8 +125,11 @@
           "aria-label",
           showPassword ? "Hide password" : "Show password"
         );
-        loginPasswordToggle.querySelector("[data-eye-closed]").hidden = showPassword;
-        loginPasswordToggle.querySelector("[data-eye-open]").hidden = !showPassword;
+        const closedEye = loginPasswordToggle.querySelector("[data-eye-closed]");
+        const openEye = loginPasswordToggle.querySelector("[data-eye-open]");
+
+        closedEye.style.display = showPassword ? "none" : "block";
+        openEye.style.display = showPassword ? "block" : "none";
         loginPassword.focus();
       });
     }

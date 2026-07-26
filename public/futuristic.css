@@ -706,7 +706,7 @@ body.dark-mode .login-box {
   stroke-linejoin: round;
 }
 
-.login-password-toggle svg[hidden] {
+.login-password-toggle .login-eye-open {
   display: none;
 }
 
