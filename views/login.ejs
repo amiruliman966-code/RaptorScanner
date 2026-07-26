@@ -58,12 +58,34 @@
           required
         >
 
-        <input 
-          type="password" 
-          name="password" 
-          placeholder="Password" 
-          required
-        >
+        <div class="login-password-field">
+          <input
+            id="loginPassword"
+            type="password"
+            name="password"
+            placeholder="Password"
+            autocomplete="current-password"
+            required
+          >
+          <button
+            type="button"
+            class="login-password-toggle"
+            aria-label="Show password"
+            aria-pressed="false"
+            data-login-password-toggle
+          >
+            <svg data-eye-closed viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 3l18 18"></path>
+              <path d="M10.6 10.7a2 2 0 0 0 2.7 2.7"></path>
+              <path d="M9.9 4.2A10.7 10.7 0 0 1 12 4c5.5 0 9 8 9 8a16.8 16.8 0 0 1-2.1 3.2"></path>
+              <path d="M6.6 6.6C4.2 8.2 3 12 3 12s3.5 8 9 8a9.7 9.7 0 0 0 4.1-.9"></path>
+            </svg>
+            <svg data-eye-open viewBox="0 0 24 24" aria-hidden="true" hidden>
+              <path d="M3 12s3.5-8 9-8 9 8 9 8-3.5 8-9 8-9-8-9-8z"></path>
+              <circle cx="12" cy="12" r="2.5"></circle>
+            </svg>
+          </button>
+        </div>
 
         <div class="forgot-password-wrap">
           <a href="/forgot-password" class="forgot-password-link">
@@ -90,5 +112,24 @@
   </main>
 
   <script src="/theme.js"></script>
+  <script>
+    const loginPassword = document.getElementById("loginPassword");
+    const loginPasswordToggle = document.querySelector("[data-login-password-toggle]");
+
+    if (loginPassword && loginPasswordToggle) {
+      loginPasswordToggle.addEventListener("click", () => {
+        const showPassword = loginPassword.type === "password";
+        loginPassword.type = showPassword ? "text" : "password";
+        loginPasswordToggle.setAttribute("aria-pressed", String(showPassword));
+        loginPasswordToggle.setAttribute(
+          "aria-label",
+          showPassword ? "Hide password" : "Show password"
+        );
+        loginPasswordToggle.querySelector("[data-eye-closed]").hidden = showPassword;
+        loginPasswordToggle.querySelector("[data-eye-open]").hidden = !showPassword;
+        loginPassword.focus();
+      });
+    }
+  </script>
 </body>
 </html>
