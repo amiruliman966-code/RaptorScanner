@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Search Result - RaptorScanner</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/futuristic.css">
 </head>
 <body>
 
@@ -49,150 +50,375 @@
     <!-- WHOIS / RDAP RESULT -->
     <% if (typeof whoisResult !== "undefined" && whoisResult) { %>
 
-      <% 
+      <%
+        function hasValue(value) {
+          if (value === null || value === undefined) return false;
+
+          if (Array.isArray(value)) {
+            return value.length > 0 && value.some(item => hasValue(item));
+          }
+
+          const cleanValue = String(value).trim().toLowerCase();
+
+          return (
+            cleanValue !== "" &&
+            cleanValue !== "not available" &&
+            cleanValue !== "n/a" &&
+            cleanValue !== "na" &&
+            cleanValue !== "null" &&
+            cleanValue !== "undefined" &&
+            cleanValue !== "no data" &&
+            cleanValue !== "-"
+          );
+        }
+
+        function formatValue(value) {
+          if (!hasValue(value)) return "";
+
+          if (Array.isArray(value)) {
+            return value
+              .filter(item => hasValue(item))
+              .map(item => String(item).trim())
+              .join("\n");
+          }
+
+          return String(value).trim();
+        }
+
+        function sectionHasData(rows) {
+          return rows.some(row => hasValue(row.value));
+        }
+
+        const domainInfo = whoisResult.domainInfo || {};
         const registrarInfo = whoisResult.registrarInfo || {};
         const registrantContact = whoisResult.registrantContact || {};
+        const technicalContact =
+          whoisResult.technicalContact ||
+          whoisResult.techContact ||
+          {};
+
+        const adminContact =
+          whoisResult.adminContact ||
+          whoisResult.administrativeContact ||
+          {};
+
+        const domainRows = [
+          {
+            label: "Domain",
+            value: domainInfo.domain || whoisResult.domain
+          },
+          {
+            label: "Registered On",
+            value:
+              domainInfo.registeredOn ||
+              domainInfo.creationDate ||
+              whoisResult.creationDate
+          },
+          {
+            label: "Expires On",
+            value:
+              domainInfo.expiresOn ||
+              domainInfo.expiryDate ||
+              whoisResult.expiryDate
+          },
+          {
+            label: "Updated On",
+            value:
+              domainInfo.updatedOn ||
+              domainInfo.updatedDate ||
+              whoisResult.updatedDate
+          },
+          {
+            label: "Status",
+            value: domainInfo.status || whoisResult.status
+          },
+          {
+            label: "Name Servers",
+            value:
+              domainInfo.nameServers ||
+              domainInfo.nameservers ||
+              whoisResult.nameServers
+          }
+        ];
+
+        const registrarRows = [
+          {
+            label: "Registrar",
+            value: registrarInfo.registrar || whoisResult.registrar
+          },
+          {
+            label: "IANA ID",
+            value: registrarInfo.ianaId || registrarInfo.iana_id
+          },
+          {
+            label: "Email",
+            value: registrarInfo.email
+          },
+          {
+            label: "Abuse Email",
+            value: registrarInfo.abuseEmail || registrarInfo.abuse_email
+          },
+          {
+            label: "Abuse Phone",
+            value: registrarInfo.abusePhone || registrarInfo.abuse_phone
+          },
+          {
+            label: "WHOIS Server",
+            value: registrarInfo.whoisServer || registrarInfo.whois_server
+          }
+        ];
+
+        const registrantRows = [
+          {
+            label: "Name",
+            value: registrantContact.name
+          },
+          {
+            label: "Organization",
+            value: registrantContact.organization
+          },
+          {
+            label: "Street",
+            value: registrantContact.street
+          },
+          {
+            label: "City",
+            value: registrantContact.city
+          },
+          {
+            label: "State",
+            value: registrantContact.state
+          },
+          {
+            label: "Postal Code",
+            value: registrantContact.postalCode || registrantContact.postal_code
+          },
+          {
+            label: "Country",
+            value: registrantContact.country
+          },
+          {
+            label: "Phone",
+            value: registrantContact.phone
+          },
+          {
+            label: "Fax",
+            value: registrantContact.fax
+          },
+          {
+            label: "Email",
+            value: registrantContact.email
+          }
+        ];
+
+        const technicalRows = [
+          {
+            label: "Name",
+            value: technicalContact.name
+          },
+          {
+            label: "Organization",
+            value: technicalContact.organization
+          },
+          {
+            label: "Street",
+            value: technicalContact.street
+          },
+          {
+            label: "City",
+            value: technicalContact.city
+          },
+          {
+            label: "State",
+            value: technicalContact.state
+          },
+          {
+            label: "Postal Code",
+            value: technicalContact.postalCode || technicalContact.postal_code
+          },
+          {
+            label: "Country",
+            value: technicalContact.country
+          },
+          {
+            label: "Phone",
+            value: technicalContact.phone
+          },
+          {
+            label: "Fax",
+            value: technicalContact.fax
+          },
+          {
+            label: "Email",
+            value: technicalContact.email
+          }
+        ];
+
+        const adminRows = [
+          {
+            label: "Name",
+            value: adminContact.name
+          },
+          {
+            label: "Organization",
+            value: adminContact.organization
+          },
+          {
+            label: "Street",
+            value: adminContact.street
+          },
+          {
+            label: "City",
+            value: adminContact.city
+          },
+          {
+            label: "State",
+            value: adminContact.state
+          },
+          {
+            label: "Postal Code",
+            value: adminContact.postalCode || adminContact.postal_code
+          },
+          {
+            label: "Country",
+            value: adminContact.country
+          },
+          {
+            label: "Phone",
+            value: adminContact.phone
+          },
+          {
+            label: "Fax",
+            value: adminContact.fax
+          },
+          {
+            label: "Email",
+            value: adminContact.email
+          }
+        ];
       %>
 
-      <section class="advanced-card">
-        <h2>WHOIS Lookup Result</h2>
-
-        <div class="details-grid">
-          <div>
-            <span class="result-label">Target</span>
-            <p class="break-text"><%= whoisResult.domain %></p>
+      <% if (sectionHasData(domainRows)) { %>
+        <section class="advanced-card whois-info-card">
+          <div class="whois-section-title">
+            <span class="whois-icon">🌐</span>
+            <h2>Domain Information</h2>
           </div>
 
-          <div>
-            <span class="result-label">Registrar / Organization</span>
-            <p class="break-text"><%= whoisResult.registrar %></p>
+          <div class="whois-info-table">
+            <% domainRows.forEach(row => { %>
+              <% if (hasValue(row.value)) { %>
+                <div class="whois-row">
+                  <span><%= row.label %>:</span>
+                  <p class="break-text whois-multiline"><%= formatValue(row.value) %></p>
+                </div>
+              <% } %>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+
+      <% if (sectionHasData(registrarRows)) { %>
+        <section class="advanced-card whois-info-card">
+          <div class="whois-section-title">
+            <span class="whois-icon">Ⓡ</span>
+            <h2>Registrar Information</h2>
           </div>
 
-          <div>
-            <span class="result-label">Creation Date</span>
-            <p><%= whoisResult.creationDate %></p>
+          <div class="whois-info-table">
+            <% registrarRows.forEach(row => { %>
+              <% if (hasValue(row.value)) { %>
+                <div class="whois-row">
+                  <span><%= row.label %>:</span>
+                  <p class="break-text whois-multiline"><%= formatValue(row.value) %></p>
+                </div>
+              <% } %>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+
+      <% if (sectionHasData(registrantRows)) { %>
+        <section class="advanced-card whois-info-card">
+          <div class="whois-section-title">
+            <span class="whois-icon">👤</span>
+            <h2>Registrant Contact</h2>
           </div>
 
-          <div>
-            <span class="result-label">Expiry Date</span>
-            <p><%= whoisResult.expiryDate %></p>
+          <div class="whois-info-table">
+            <% registrantRows.forEach(row => { %>
+              <% if (hasValue(row.value)) { %>
+                <div class="whois-row">
+                  <span><%= row.label %>:</span>
+                  <p class="break-text whois-multiline"><%= formatValue(row.value) %></p>
+                </div>
+              <% } %>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+
+      <% if (sectionHasData(technicalRows)) { %>
+        <section class="advanced-card whois-info-card">
+          <div class="whois-section-title">
+            <span class="whois-icon">🛠</span>
+            <h2>Technical Contact</h2>
           </div>
 
-          <div>
-            <span class="result-label">Updated Date</span>
-            <p><%= whoisResult.updatedDate %></p>
+          <div class="whois-info-table">
+            <% technicalRows.forEach(row => { %>
+              <% if (hasValue(row.value)) { %>
+                <div class="whois-row">
+                  <span><%= row.label %>:</span>
+                  <p class="break-text whois-multiline"><%= formatValue(row.value) %></p>
+                </div>
+              <% } %>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+
+      <% if (sectionHasData(adminRows)) { %>
+        <section class="advanced-card whois-info-card">
+          <div class="whois-section-title">
+            <span class="whois-icon">⚙️</span>
+            <h2>Admin Contact</h2>
           </div>
 
-          <div>
-            <span class="result-label">Status</span>
-            <p class="break-text"><%= whoisResult.status %></p>
+          <div class="whois-info-table">
+            <% adminRows.forEach(row => { %>
+              <% if (hasValue(row.value)) { %>
+                <div class="whois-row">
+                  <span><%= row.label %>:</span>
+                  <p class="break-text whois-multiline"><%= formatValue(row.value) %></p>
+                </div>
+              <% } %>
+            <% }) %>
           </div>
+        </section>
+      <% } %>
 
-          <div>
-            <span class="result-label">Name Servers / IP Range</span>
-            <p class="break-text"><%= whoisResult.nameServers %></p>
+      <% if (
+        !sectionHasData(domainRows) &&
+        !sectionHasData(registrarRows) &&
+        !sectionHasData(registrantRows) &&
+        !sectionHasData(technicalRows) &&
+        !sectionHasData(adminRows)
+      ) { %>
+        <section class="advanced-card whois-info-card">
+          <div class="empty-result">
+            <h3>No WHOIS/RDAP Public Information Found</h3>
+            <p>No public WHOIS/RDAP details were returned for this search.</p>
           </div>
-        </div>
-      </section>
-
-      <!-- REGISTRAR INFORMATION -->
-      <section class="advanced-card whois-info-card">
-        <div class="whois-section-title">
-          <span class="whois-icon">Ⓡ</span>
-          <h2>Registrar Information</h2>
-        </div>
-
-        <div class="whois-info-table">
-          <div class="whois-row">
-            <span>Registrar:</span>
-            <p><%= registrarInfo.registrar || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>IANA ID:</span>
-            <p><%= registrarInfo.ianaId || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>Email:</span>
-            <p class="break-text"><%= registrarInfo.email || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>Abuse Email:</span>
-            <p class="break-text"><%= registrarInfo.abuseEmail || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>Abuse Phone:</span>
-            <p><%= registrarInfo.abusePhone || "Not available" %></p>
-          </div>
-        </div>
-      </section>
-
-      <!-- REGISTRANT CONTACT -->
-      <section class="advanced-card whois-info-card">
-        <div class="whois-section-title">
-          <span class="whois-icon">♙</span>
-          <h2>Registrant Contact</h2>
-        </div>
-
-        <div class="whois-info-table">
-          <div class="whois-row">
-            <span>Name:</span>
-            <p><%= registrantContact.name || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>Organization:</span>
-            <p><%= registrantContact.organization || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>Street:</span>
-            <p><%= registrantContact.street || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>City:</span>
-            <p><%= registrantContact.city || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>State:</span>
-            <p><%= registrantContact.state || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>Postal Code:</span>
-            <p><%= registrantContact.postalCode || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>Country:</span>
-            <p><%= registrantContact.country || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>Phone:</span>
-            <p><%= registrantContact.phone || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>Fax:</span>
-            <p><%= registrantContact.fax || "Not available" %></p>
-          </div>
-
-          <div class="whois-row">
-            <span>Email:</span>
-            <p class="break-text"><%= registrantContact.email || "Not available" %></p>
-          </div>
-        </div>
-      </section>
+        </section>
+      <% } %>
 
     <% } %>
 
-    <% 
+    <%
+      const safeFileResults = typeof fileResults !== "undefined" ? fileResults : [];
+      const safeUrlResults = typeof urlResults !== "undefined" ? urlResults : [];
+
       let totalResults = 0;
 
       if (
@@ -200,9 +426,9 @@
         searchType === "SHA-1 Hash" ||
         searchType === "SHA-256 Hash"
       ) {
-        totalResults = fileResults.length;
+        totalResults = safeFileResults.length;
       } else {
-        totalResults = urlResults.length;
+        totalResults = safeUrlResults.length;
       }
     %>
 
@@ -229,18 +455,21 @@
       searchType === "SHA-256 Hash"
     ) { %>
 
-      <section class="advanced-card">
-        <h2>File Intelligence Result</h2>
+      <section class="advanced-card whois-info-card search-intelligence-card">
+        <div class="whois-section-title">
+          <span class="whois-icon" aria-hidden="true">F</span>
+          <h2>File Intelligence Result</h2>
+        </div>
 
-        <% if (fileResults.length === 0) { %>
+        <% if (safeFileResults.length === 0) { %>
           <div class="empty-result">
             <h3>No File Result Found</h3>
             <p>This hash does not exist in your local scan database.</p>
           </div>
         <% } else { %>
 
-          <% fileResults.forEach((file, index) => { %>
-            <div class="advanced-result-item">
+          <% safeFileResults.forEach((file, index) => { %>
+            <div class="advanced-result-item local-intelligence-result">
 
               <div class="result-item-header">
                 <h3>File Result #<%= index + 1 %></h3>
@@ -254,47 +483,55 @@
                 <% } %>
               </div>
 
-              <div class="details-grid">
-                <div>
-                  <span class="result-label">File Name</span>
-                  <p><%= file.original_name %></p>
+              <div class="whois-info-table local-result-table">
+                <div class="whois-row">
+                  <span>File Name:</span>
+                  <p class="break-text"><%= file.original_name %></p>
                 </div>
 
-                <div>
-                  <span class="result-label">File Size</span>
+                <div class="whois-row">
+                  <span>File Size:</span>
                   <p><%= (file.file_size / 1024).toFixed(2) %> KB</p>
                 </div>
 
-                <div>
-                  <span class="result-label">Scan Result</span>
+                <div class="whois-row">
+                  <span>Scan Result:</span>
                   <p><%= file.scan_result %></p>
                 </div>
 
-                <div>
-                  <span class="result-label">Risk Level</span>
-                  <p><%= file.risk_level %></p>
+                <div class="whois-row">
+                  <span>Risk Level:</span>
+                  <p>
+                    <% if (file.risk_level === "High") { %>
+                      <span class="badge high">High Risk</span>
+                    <% } else if (file.risk_level === "Medium") { %>
+                      <span class="badge medium">Medium Risk</span>
+                    <% } else { %>
+                      <span class="badge low">Low Risk</span>
+                    <% } %>
+                  </p>
                 </div>
               </div>
 
               <div class="hash-section">
                 <h4>Hash Values</h4>
 
-                <div class="hash-row">
+                <div class="hash-row whois-row">
                   <span>MD5</span>
                   <code><%= file.md5_hash %></code>
-                  <button onclick="copyText('<%= file.md5_hash %>')">Copy</button>
+                  <button type="button" onclick="copyText('<%= file.md5_hash %>')">Copy</button>
                 </div>
 
-                <div class="hash-row">
+                <div class="hash-row whois-row">
                   <span>SHA-1</span>
                   <code><%= file.sha1_hash %></code>
-                  <button onclick="copyText('<%= file.sha1_hash %>')">Copy</button>
+                  <button type="button" onclick="copyText('<%= file.sha1_hash %>')">Copy</button>
                 </div>
 
-                <div class="hash-row">
+                <div class="hash-row whois-row">
                   <span>SHA-256</span>
                   <code><%= file.sha256_hash %></code>
-                  <button onclick="copyText('<%= file.sha256_hash %>')">Copy</button>
+                  <button type="button" onclick="copyText('<%= file.sha256_hash %>')">Copy</button>
                 </div>
               </div>
 
@@ -306,18 +543,21 @@
 
     <% } else { %>
 
-      <section class="advanced-card">
-        <h2>URL / Domain / IP Intelligence Result</h2>
+      <section class="advanced-card whois-info-card search-intelligence-card">
+        <div class="whois-section-title">
+          <span class="whois-icon" aria-hidden="true">U</span>
+          <h2>URL / Domain / IP Intelligence Result</h2>
+        </div>
 
-        <% if (urlResults.length === 0) { %>
+        <% if (safeUrlResults.length === 0) { %>
           <div class="empty-result">
             <h3>No URL, Domain, or IP Result Found</h3>
             <p>This search query does not exist in your local URL scan database.</p>
           </div>
         <% } else { %>
 
-          <% urlResults.forEach((item, index) => { %>
-            <div class="advanced-result-item">
+          <% safeUrlResults.forEach((item, index) => { %>
+            <div class="advanced-result-item local-intelligence-result">
 
               <div class="result-item-header">
                 <h3>URL Result #<%= index + 1 %></h3>
@@ -331,34 +571,42 @@
                 <% } %>
               </div>
 
-              <div class="details-grid">
-                <div>
-                  <span class="result-label">URL</span>
+              <div class="whois-info-table local-result-table">
+                <div class="whois-row">
+                  <span>URL:</span>
                   <p class="break-text"><%= item.url %></p>
                 </div>
 
-                <div>
-                  <span class="result-label">Domain</span>
+                <div class="whois-row">
+                  <span>Domain:</span>
                   <p class="break-text"><%= item.domain %></p>
                 </div>
 
-                <div>
-                  <span class="result-label">Protocol</span>
+                <div class="whois-row">
+                  <span>Protocol:</span>
                   <p><%= item.protocol %></p>
                 </div>
 
-                <div>
-                  <span class="result-label">Status</span>
+                <div class="whois-row">
+                  <span>Status:</span>
                   <p><%= item.scan_result %></p>
                 </div>
 
-                <div>
-                  <span class="result-label">Risk Level</span>
-                  <p><%= item.risk_level %></p>
+                <div class="whois-row">
+                  <span>Risk Level:</span>
+                  <p>
+                    <% if (item.risk_level === "High") { %>
+                      <span class="badge high">High Risk</span>
+                    <% } else if (item.risk_level === "Medium") { %>
+                      <span class="badge medium">Medium Risk</span>
+                    <% } else { %>
+                      <span class="badge low">Low Risk</span>
+                    <% } %>
+                  </p>
                 </div>
 
-                <div>
-                  <span class="result-label">Reason</span>
+                <div class="whois-row">
+                  <span>Reason:</span>
                   <p><%= item.reason %></p>
                 </div>
               </div>

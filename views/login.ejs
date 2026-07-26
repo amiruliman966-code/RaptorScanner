@@ -1,27 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - RaptorScanner</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/futuristic.css">
 </head>
 <body>
 
-  <!-- Navigation Bar -->
-  <nav class="navbar">
+  <!-- NAVBAR -->
+  <nav class="navbar login-navbar" id="loginNavbar">
     <div class="logo">RaptorScanner</div>
+
+    <button type="button" class="nav-toggle" id="navToggle">☰</button>
 
     <div class="nav-links">
       <a href="/">Home</a>
       <a href="/login">Login</a>
       <a href="/register">Sign Up</a>
-      <button id="themeToggle" class="theme-btn">🌙</button>
+      <button type="button" id="themeToggle" class="theme-btn">🌙</button>
     </div>
   </nav>
 
-  <!-- Login Page -->
-  <main class="fb-login-page">
+  <!-- LOGIN PAGE -->
+  <main class="login-responsive-page">
 
-    <!-- Left Side Branding -->
+    <!-- LEFT BRAND BOX -->
     <section class="login-brand">
       <div class="logo-badge">🛡️</div>
 
@@ -33,7 +38,7 @@
       </p>
     </section>
 
-    <!-- Right Side Login Box -->
+    <!-- RIGHT LOGIN BOX -->
     <section class="login-box">
       <h2>Log in to RaptorScanner</h2>
 

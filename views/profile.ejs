@@ -1,185 +1,408 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Profile - RaptorScanner</title>
+  <title>My Profile - RaptorScanner</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/futuristic.css">
 </head>
 <body>
 
   <nav class="navbar" id="dashboardNavbar">
-    <div class="logo">RaptorScanner</div>
+    <div class="logo">
+      <span class="brand-mark" aria-hidden="true">R</span>
+      RaptorScanner
+    </div>
 
-    <button class="nav-toggle" id="navToggle">☰</button>
+    <button
+      type="button"
+      class="nav-toggle"
+      id="navToggle"
+      aria-label="Toggle navigation"
+      aria-expanded="false"
+    >
+      &#9776;
+    </button>
 
     <div class="nav-links">
       <a href="/">Home</a>
       <a href="/dashboard">Dashboard</a>
       <a href="/history">Scan History</a>
-      <a href="/profile">Profile</a>
+      <a href="/profile" class="active">Profile</a>
 
       <% if (user && user.role === "admin") { %>
         <a href="/admin">Admin</a>
       <% } %>
 
       <a href="/logout">Logout</a>
-      <button id="themeToggle" class="theme-btn">🌙</button>
     </div>
   </nav>
 
-  <main class="profile-page">
+  <main class="profile-v2-page">
 
-    <section class="profile-header-card">
-      <div class="profile-picture-box">
-        <% if (profileUser.profile_picture) { %>
-          <img src="<%= profileUser.profile_picture %>" alt="Profile Picture">
-        <% } else { %>
-          <div class="profile-default-icon">
-            <%= profileUser.name ? profileUser.name.charAt(0).toUpperCase() : "U" %>
-          </div>
-        <% } %>
+    <header class="profile-v2-hero">
+      <div class="profile-v2-avatar-wrap">
+        <div class="profile-v2-avatar">
+          <% if (profileUser.profile_picture) { %>
+            <img
+              id="profileAvatarPreview"
+              src="<%= profileUser.profile_picture %>"
+              alt="<%= profileUser.name %> profile picture"
+            >
+          <% } else { %>
+            <div id="profileAvatarFallback" class="profile-v2-avatar-fallback">
+              <%= profileUser.name ? profileUser.name.charAt(0).toUpperCase() : "U" %>
+            </div>
+            <img
+              id="profileAvatarPreview"
+              src=""
+              alt="Profile picture preview"
+              hidden
+            >
+          <% } %>
+        </div>
+        <span class="profile-v2-online" title="Account active"></span>
       </div>
 
-      <div class="profile-info">
+      <div class="profile-v2-identity">
+        <p class="profile-v2-eyebrow">Account settings</p>
         <h1><%= profileUser.name %></h1>
-        <p><%= profileUser.email %></p>
+        <p class="profile-v2-email"><%= profileUser.email %></p>
 
-        <% if (profileUser.role === "admin") { %>
-          <span class="admin-role-badge">Admin</span>
-        <% } else { %>
-          <span class="user-role-badge">User</span>
-        <% } %>
+        <div class="profile-v2-badges">
+          <span class="profile-v2-role <%= profileUser.role === 'admin' ? 'is-admin' : '' %>">
+            <%= profileUser.role === "admin" ? "Administrator" : "Verified User" %>
+          </span>
+          <span class="profile-v2-provider">
+            <%= profileUser.auth_provider === "google" ? "Google Account" : "Email Account" %>
+          </span>
+        </div>
       </div>
-    </section>
+
+      <div class="profile-v2-hero-meta">
+        <span>Member since</span>
+        <strong>
+          <%= profileUser.created_at
+            ? new Date(profileUser.created_at).toLocaleDateString("en-MY", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+              })
+            : "-" %>
+        </strong>
+      </div>
+    </header>
 
     <% if (error) { %>
-      <p class="error profile-message"><%= error %></p>
+      <div class="profile-v2-alert is-error" role="alert">
+        <span aria-hidden="true">!</span>
+        <p><%= error %></p>
+      </div>
     <% } %>
 
     <% if (success) { %>
-      <p class="success profile-message"><%= success %></p>
+      <div class="profile-v2-alert is-success" role="status">
+        <span aria-hidden="true">&#10003;</span>
+        <p><%= success %></p>
+      </div>
     <% } %>
 
-    <section class="profile-grid">
+    <div class="profile-v2-layout">
 
-      <!-- UPDATE PROFILE -->
-      <div class="profile-card">
-        <h2>Edit Profile</h2>
+      <aside class="profile-v2-sidebar">
+        <section class="profile-v2-card">
+          <div class="profile-v2-card-heading">
+            <span class="profile-v2-heading-icon" aria-hidden="true">&#9678;</span>
+            <div>
+              <p>Account overview</p>
+              <h2>Your details</h2>
+            </div>
+          </div>
 
-        <form action="/profile/update" method="POST" enctype="multipart/form-data">
-          <label>Full Name</label>
-          <input 
-            type="text" 
-            name="name" 
-            value="<%= profileUser.name %>" 
-            required
+          <dl class="profile-v2-details">
+            <div>
+              <dt>Full name</dt>
+              <dd><%= profileUser.name %></dd>
+            </div>
+            <div>
+              <dt>Email address</dt>
+              <dd class="break-text"><%= profileUser.email %></dd>
+            </div>
+            <div>
+              <dt>Phone number</dt>
+              <dd><%= profileUser.phone || "Not added" %></dd>
+            </div>
+            <div>
+              <dt>Authentication</dt>
+              <dd>
+                <%= profileUser.auth_provider === "google"
+                  ? "Google OAuth"
+                  : "Email & Password" %>
+              </dd>
+            </div>
+            <div>
+              <dt>Account role</dt>
+              <dd><%= profileUser.role || "user" %></dd>
+            </div>
+          </dl>
+        </section>
+
+        <a href="/history" class="profile-v2-history-link">
+          <span>
+            <small>Security activity</small>
+            View your scan history
+          </span>
+          <strong aria-hidden="true">&rarr;</strong>
+        </a>
+      </aside>
+
+      <div class="profile-v2-content">
+
+        <section class="profile-v2-card">
+          <div class="profile-v2-card-heading">
+            <span class="profile-v2-heading-icon" aria-hidden="true">&#9998;</span>
+            <div>
+              <p>Personal information</p>
+              <h2>Edit profile</h2>
+            </div>
+          </div>
+
+          <form
+            class="profile-v2-form"
+            action="/profile/update"
+            method="POST"
+            enctype="multipart/form-data"
           >
+            <div class="profile-v2-form-grid">
+              <div class="profile-v2-field">
+                <label for="profileName">Full name</label>
+                <input
+                  id="profileName"
+                  type="text"
+                  name="name"
+                  value="<%= profileUser.name %>"
+                  autocomplete="name"
+                  required
+                >
+              </div>
 
-          <label>Email Address</label>
-          <input 
-            type="email" 
-            value="<%= profileUser.email %>" 
-            disabled
-          >
+              <div class="profile-v2-field">
+                <label for="profilePhone">Phone number</label>
+                <input
+                  id="profilePhone"
+                  type="tel"
+                  name="phone"
+                  value="<%= profileUser.phone || '' %>"
+                  placeholder="Example: 0123456789"
+                  autocomplete="tel"
+                >
+              </div>
+            </div>
 
-          <small>Email cannot be changed.</small>
+            <div class="profile-v2-field">
+              <label for="profileEmail">Email address</label>
+              <input
+                id="profileEmail"
+                type="email"
+                value="<%= profileUser.email %>"
+                disabled
+              >
+              <small>Email is linked to your account and cannot be changed here.</small>
+            </div>
 
-          <label>Phone Number</label>
-          <input 
-            type="text" 
-            name="phone" 
-            placeholder="Example: 0123456789"
-            value="<%= profileUser.phone || "" %>"
-          >
+            <div class="profile-v2-upload">
+              <div>
+                <strong>Profile picture</strong>
+                <p>JPG, PNG or WEBP. Maximum file size is 2 MB.</p>
+              </div>
 
-          <label>Profile Picture</label>
-          <input 
-            type="file" 
-            name="profile_picture" 
-            accept="image/*"
-          >
+              <label class="profile-v2-upload-button" for="profilePictureInput">
+                Choose image
+              </label>
+              <input
+                id="profilePictureInput"
+                type="file"
+                name="profile_picture"
+                accept="image/jpeg,image/png,image/webp"
+              >
+              <span id="profileFileName" class="profile-v2-file-name">No file selected</span>
+            </div>
 
-          <button type="submit">Update Profile</button>
-        </form>
-      </div>
-
-      <!-- ACCOUNT DETAILS -->
-      <div class="profile-card">
-        <h2>Account Details</h2>
-
-        <div class="profile-detail-row">
-          <span>Name</span>
-          <p><%= profileUser.name %></p>
-        </div>
-
-        <div class="profile-detail-row">
-          <span>Email</span>
-          <p class="break-text"><%= profileUser.email %></p>
-        </div>
-
-        <div class="profile-detail-row">
-          <span>Phone</span>
-          <p><%= profileUser.phone || "Not added" %></p>
-        </div>
-
-        <div class="profile-detail-row">
-          <span>Login Type</span>
-          <p><%= profileUser.auth_provider || "local" %></p>
-        </div>
-
-        <div class="profile-detail-row">
-          <span>Role</span>
-          <p><%= profileUser.role || "user" %></p>
-        </div>
-
-        <div class="profile-detail-row">
-          <span>Joined Date</span>
-          <p><%= new Date(profileUser.created_at).toLocaleString() %></p>
-        </div>
-      </div>
-
-      <!-- CHANGE PASSWORD -->
-      <div class="profile-card profile-card-full">
-        <h2>Change Password</h2>
-
-        <% if (profileUser.password === "GOOGLE_LOGIN") { %>
-          <p>This account uses Google login. Password cannot be changed here.</p>
-        <% } else { %>
-          <form action="/profile/change-password" method="POST">
-            <label>Current Password</label>
-            <input 
-              type="password" 
-              name="currentPassword" 
-              placeholder="Current password"
-              required
-            >
-
-            <label>New Password</label>
-            <input 
-              type="password" 
-              name="newPassword" 
-              placeholder="New password"
-              required
-            >
-
-            <label>Confirm New Password</label>
-            <input 
-              type="password" 
-              name="confirmPassword" 
-              placeholder="Confirm new password"
-              required
-            >
-
-            <button type="submit">Change Password</button>
+            <div class="profile-v2-actions">
+              <button type="submit" class="profile-v2-primary-button">
+                Save Profile Changes
+              </button>
+            </div>
           </form>
-        <% } %>
+        </section>
+
+        <section class="profile-v2-card profile-v2-security-card">
+          <div class="profile-v2-card-heading">
+            <span class="profile-v2-heading-icon" aria-hidden="true">&#9919;</span>
+            <div>
+              <p>Account protection</p>
+              <h2>Password & security</h2>
+            </div>
+          </div>
+
+          <% if (profileUser.password === "GOOGLE_LOGIN") { %>
+            <div class="profile-v2-google-notice">
+              <span class="profile-v2-google-mark">G</span>
+              <div>
+                <strong>Managed by Google</strong>
+                <p>
+                  This account uses Google authentication. Manage your password
+                  and security settings through your Google Account.
+                </p>
+              </div>
+            </div>
+          <% } else if (passwordStep === "verify") { %>
+            <div class="profile-v2-otp-intro">
+              <span aria-hidden="true">&#9993;</span>
+              <div>
+                <strong>Check your email</strong>
+                <p>
+                  Enter the 6-digit verification code sent to
+                  <%= profileUser.email %>. The code expires in 10 minutes.
+                </p>
+              </div>
+            </div>
+
+            <form
+              class="profile-v2-form"
+              action="/profile/verify-change-password"
+              method="POST"
+            >
+              <div class="profile-v2-field">
+                <label for="profileOtp">Verification code</label>
+                <input
+                  id="profileOtp"
+                  class="profile-v2-otp-input"
+                  type="text"
+                  name="otp"
+                  placeholder="000000"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  minlength="6"
+                  maxlength="6"
+                  pattern="[0-9]{6}"
+                  required
+                >
+              </div>
+
+              <button type="submit" class="profile-v2-primary-button">
+                Verify & Change Password
+              </button>
+            </form>
+          <% } else { %>
+            <form
+              class="profile-v2-form"
+              action="/profile/change-password"
+              method="POST"
+            >
+              <div class="profile-v2-field">
+                <label for="currentPassword">Current password</label>
+                <div class="profile-v2-password">
+                  <input
+                    id="currentPassword"
+                    type="password"
+                    name="currentPassword"
+                    placeholder="Enter current password"
+                    autocomplete="current-password"
+                    required
+                  >
+                  <button type="button" data-password-target="currentPassword">Show</button>
+                </div>
+              </div>
+
+              <div class="profile-v2-form-grid">
+                <div class="profile-v2-field">
+                  <label for="newProfilePassword">New password</label>
+                  <div class="profile-v2-password">
+                    <input
+                      id="newProfilePassword"
+                      type="password"
+                      name="newPassword"
+                      placeholder="Minimum 6 characters"
+                      autocomplete="new-password"
+                      minlength="6"
+                      required
+                    >
+                    <button type="button" data-password-target="newProfilePassword">Show</button>
+                  </div>
+                </div>
+
+                <div class="profile-v2-field">
+                  <label for="confirmProfilePassword">Confirm password</label>
+                  <div class="profile-v2-password">
+                    <input
+                      id="confirmProfilePassword"
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="Repeat new password"
+                      autocomplete="new-password"
+                      minlength="6"
+                      required
+                    >
+                    <button type="button" data-password-target="confirmProfilePassword">Show</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="profile-v2-security-note">
+                A verification code will be sent to your registered email before
+                the password is changed.
+              </div>
+
+              <button type="submit" class="profile-v2-primary-button">
+                Continue with Email Verification
+              </button>
+            </form>
+          <% } %>
+        </section>
+
       </div>
-
-    </section>
-
+    </div>
   </main>
 
   <script src="/theme.js"></script>
+  <script>
+    const pictureInput = document.getElementById("profilePictureInput");
+    const fileName = document.getElementById("profileFileName");
+    const avatarPreview = document.getElementById("profileAvatarPreview");
+    const avatarFallback = document.getElementById("profileAvatarFallback");
+
+    if (pictureInput) {
+      pictureInput.addEventListener("change", () => {
+        const file = pictureInput.files && pictureInput.files[0];
+
+        if (!file) {
+          fileName.textContent = "No file selected";
+          return;
+        }
+
+        fileName.textContent = file.name;
+        avatarPreview.src = URL.createObjectURL(file);
+        avatarPreview.hidden = false;
+
+        if (avatarFallback) {
+          avatarFallback.hidden = true;
+        }
+      });
+    }
+
+    document.querySelectorAll("[data-password-target]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const input = document.getElementById(button.dataset.passwordTarget);
+
+        if (!input) return;
+
+        const showPassword = input.type === "password";
+        input.type = showPassword ? "text" : "password";
+        button.textContent = showPassword ? "Hide" : "Show";
+      });
+    });
+  </script>
 </body>
 </html>

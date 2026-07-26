@@ -5,6 +5,8 @@ const db = require("../config/db");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 
+require("dotenv").config();
+
 const router = express.Router();
 
 // ================= CHECK LOGIN =================
@@ -18,8 +20,8 @@ function isAuthenticated(req, res, next) {
 
 // ================= EMAIL TRANSPORTER =================
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || "smtp.gmail.com",
-  port: Number(process.env.EMAIL_PORT) || 587,
+  host: process.env.EMAIL_HOST,
+  port: Number(process.env.EMAIL_PORT),
   secure: process.env.EMAIL_SECURE === "true",
   auth: {
     user: process.env.EMAIL_USER,
@@ -217,6 +219,8 @@ router.post("/login", async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role || "user",
+      phone: user.phone || null,
+      profile_picture: user.profile_picture || null,
     };
 
     res.redirect("/dashboard");
@@ -308,7 +312,8 @@ router.post("/forgot-password", async (req, res) => {
     res.render("forgot-password", {
       email,
       error: null,
-      success: "Password reset link has been sent to your email. Please check your inbox or spam folder.",
+      success:
+        "Password reset link has been sent to your email. Please check your inbox or spam folder.",
     });
   } catch (err) {
     console.error("SEND RESET LINK ERROR MESSAGE:", err.message);
@@ -423,7 +428,7 @@ router.post("/reset-password/:token", async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await db.query(
-      "UPDATE users SET password = ? WHERE id = ?",
+      "UPDATE users SET password = ?, auth_provider = 'local' WHERE id = ?",
       [hashedPassword, resetRecord.user_id]
     );
 
@@ -448,31 +453,85 @@ router.post("/reset-password/:token", async (req, res) => {
 });
 
 // ================= GOOGLE LOGIN =================
-router.get(
-  "/auth/google",
-  passport.authenticate("google", {
+router.get("/auth/google", (req, res, next) => {
+  if (!passport.googleOAuthReady) {
+    return res.status(503).render("login", {
+      error:
+        "Google login is not configured yet. Please use email login or contact the administrator.",
+      success: null,
+    });
+  }
+
+  return passport.authenticate("google", {
     scope: ["profile", "email"],
     prompt: "select_account",
-  })
-);
+  })(req, res, next);
+});
 
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: "/login",
-  }),
-  (req, res) => {
+// ================= GOOGLE CALLBACK DEBUG VERSION =================
+router.get("/auth/google/callback", (req, res, next) => {
+  if (!passport.googleOAuthReady) {
+    return res.status(503).render("login", {
+      error:
+        "Google login is not configured yet. Please use email login or contact the administrator.",
+      success: null,
+    });
+  }
+
+  passport.authenticate("google", { session: false }, (err, user, info) => {
+    if (err) {
+      console.error("GOOGLE CALLBACK ERROR NAME:", err.name);
+      console.error("GOOGLE CALLBACK ERROR MESSAGE:", err.message);
+      console.error("GOOGLE CALLBACK ERROR STATUS:", err.statusCode);
+      console.error("GOOGLE CALLBACK ERROR DATA:", err.data);
+      console.error("GOOGLE CALLBACK FULL ERROR:", err);
+
+      return res.status(500).send(`
+        <div style="font-family: Arial; max-width: 800px; margin: 60px auto; line-height: 1.6;">
+          <h1>Google Login Error</h1>
+
+          <p><strong>Name:</strong> ${err.name || "N/A"}</p>
+          <p><strong>Message:</strong> ${err.message || "N/A"}</p>
+          <p><strong>Status:</strong> ${err.statusCode || "N/A"}</p>
+          <p><strong>Data:</strong> ${err.data || "No data"}</p>
+
+          <hr>
+
+          <p>
+            Send only the Name, Message, Status, and Data to ChatGPT.
+            Do not send your Google Client Secret.
+          </p>
+
+          <a href="/login">Back to Login</a>
+        </div>
+      `);
+    }
+
+    if (!user) {
+      console.error("GOOGLE LOGIN FAILED INFO:", info);
+
+      return res.status(401).send(`
+        <div style="font-family: Arial; max-width: 800px; margin: 60px auto; line-height: 1.6;">
+          <h1>Google Login Failed</h1>
+          <p>No user was returned from Google login.</p>
+          <pre>${JSON.stringify(info, null, 2)}</pre>
+          <a href="/login">Back to Login</a>
+        </div>
+      `);
+    }
+
     req.session.user = {
-      id: req.user.id,
-      name: req.user.name,
-      email: req.user.email,
-      role: req.user.role || "user",
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role || "user",
+      phone: user.phone || null,
+      profile_picture: user.profile_picture || null,
     };
 
-    res.redirect("/dashboard");
-  }
-);
+    return res.redirect("/dashboard");
+  })(req, res, next);
+});
 
 // ================= DASHBOARD =================
 router.get("/dashboard", isAuthenticated, (req, res) => {

@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>URL Result - RaptorScanner</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/futuristic.css">
 </head>
 <body>
 
@@ -23,14 +26,23 @@
 
     <div class="card">
       <h2>URL Information</h2>
-      <p><strong>URL:</strong> <%= url %></p>
+      <p class="break-text"><strong>URL:</strong> <%= url %></p>
       <p><strong>Domain:</strong> <%= urlResult.domain %></p>
       <p><strong>Protocol:</strong> <%= urlResult.protocol %></p>
+      <% if (urlResult.normalizedUrl) { %>
+        <p class="break-text">
+          <strong>Normalized URL:</strong> <%= urlResult.normalizedUrl %>
+        </p>
+      <% } %>
     </div>
 
     <div class="card">
       <h2>Analysis Result</h2>
       <p><strong>Status:</strong> <%= urlResult.scanResult %></p>
+      <p>
+        <strong>Risk Score:</strong>
+        <span class="url-risk-score"><%= urlResult.riskScore %>/100</span>
+      </p>
 
       <% if (urlResult.riskLevel === "High") { %>
         <p class="risk-high"><strong>Risk Level:</strong> <%= urlResult.riskLevel %></p>
@@ -40,8 +52,48 @@
         <p class="risk-low"><strong>Risk Level:</strong> <%= urlResult.riskLevel %></p>
       <% } %>
 
-      <p><strong>Reason:</strong> <%= urlResult.reason %></p>
+      <h3>Security Indicators</h3>
+
+      <% if (urlResult.indicators && urlResult.indicators.length > 0) { %>
+        <ul class="url-indicator-list">
+          <% urlResult.indicators.forEach((indicator) => { %>
+            <li><%= indicator %></li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p>No suspicious URL patterns were detected.</p>
+      <% } %>
+
+      <p class="url-analysis-note">
+        A clean result does not guarantee that a website is safe. Reputation
+        services may have limited coverage or delayed detections.
+      </p>
     </div>
+
+    <% if (urlResult.engines) { %>
+      <div class="card">
+        <h2>URL Reputation Analysis</h2>
+
+        <div class="url-engine-grid">
+          <article class="url-engine-card">
+            <span class="url-engine-name">RaptorScanner Local</span>
+            <strong><%= urlResult.engines.local.verdict %></strong>
+            <small>Heuristic score: <%= urlResult.engines.local.score %>/100</small>
+          </article>
+
+          <article class="url-engine-card">
+            <span class="url-engine-name">Google Safe Browsing</span>
+            <strong><%= urlResult.engines.google.verdict %></strong>
+            <% if (urlResult.engines.google.threats.length > 0) { %>
+              <small><%= urlResult.engines.google.threats.join(", ") %></small>
+            <% } else { %>
+              <small>Status: <%= urlResult.engines.google.status %></small>
+            <% } %>
+          </article>
+
+        </div>
+      </div>
+    <% } %>
 
     <a class="btn" href="/dashboard">Back to Dashboard</a>
   </div>

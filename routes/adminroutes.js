@@ -3,6 +3,9 @@ const db = require("../config/db");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const {
+  getAnalyticsDashboardData,
+} = require("../services/analyticsService");
 
 const router = express.Router();
 
@@ -73,6 +76,10 @@ router.get("/admin", isAuthenticated, isAdmin, async (req, res) => {
       "SELECT COUNT(*) AS totalWhoisLookups FROM whois_lookups"
     );
 
+    const [[indicatorCount]] = await db.query(
+      "SELECT COUNT(*) AS totalIndicatorLookups FROM indicator_lookups"
+    );
+
     const [[highRiskFileCount]] = await db.query(
       "SELECT COUNT(*) AS totalHighRiskFiles FROM scans WHERE risk_level = 'High'"
     );
@@ -111,20 +118,39 @@ router.get("/admin", isAuthenticated, isAdmin, async (req, res) => {
        LIMIT 5`
     );
 
-    const [recentFileScans] = await db.query(
-      `SELECT scans.*, users.name AS user_name, users.email AS user_email
-       FROM scans
-       JOIN users ON scans.user_id = users.id
-       ORDER BY scans.scanned_at DESC
-       LIMIT 10`
-    );
+    const [recentScans] = await db.query(
+      `SELECT *
+       FROM (
+         SELECT
+           scans.id,
+           'File' AS scan_type,
+           users.name AS user_name,
+           users.email AS user_email,
+           scans.original_name AS target,
+           CONCAT(ROUND(scans.file_size / 1024, 2), ' KB') AS target_detail,
+           scans.scan_result,
+           scans.risk_level,
+           scans.scanned_at
+         FROM scans
+         JOIN users ON scans.user_id = users.id
 
-    const [recentUrlScans] = await db.query(
-      `SELECT url_scans.*, users.name AS user_name, users.email AS user_email
-       FROM url_scans
-       JOIN users ON url_scans.user_id = users.id
-       ORDER BY url_scans.scanned_at DESC
-       LIMIT 10`
+         UNION ALL
+
+         SELECT
+           url_scans.id,
+           'URL' AS scan_type,
+           users.name AS user_name,
+           users.email AS user_email,
+           url_scans.url AS target,
+           url_scans.domain AS target_detail,
+           url_scans.scan_result,
+           url_scans.risk_level,
+           url_scans.scanned_at
+         FROM url_scans
+         JOIN users ON url_scans.user_id = users.id
+       ) AS combined_scans
+       ORDER BY scanned_at DESC
+       LIMIT 20`
     );
 
     const [recentWhoisLookups] = await db.query(
@@ -135,10 +161,74 @@ router.get("/admin", isAuthenticated, isAdmin, async (req, res) => {
        LIMIT 10`
     );
 
+    const [recentIndicatorLookups] = await db.query(
+      `SELECT
+         indicator_lookups.id,
+         indicator_lookups.query,
+         indicator_lookups.search_type,
+         indicator_lookups.result_summary,
+         indicator_lookups.checked_at,
+         users.name AS user_name,
+         users.email AS user_email
+       FROM indicator_lookups
+       JOIN users ON indicator_lookups.user_id = users.id
+       ORDER BY indicator_lookups.checked_at DESC
+       LIMIT 10`
+    );
+
+    const [userMonitoring] = await db.query(
+      `SELECT
+         u.id,
+         u.name,
+         u.email,
+         u.phone,
+         u.role,
+         u.auth_provider,
+         u.created_at,
+         (SELECT COUNT(*) FROM scans s WHERE s.user_id = u.id) AS fileScans,
+         (SELECT COUNT(*) FROM url_scans us WHERE us.user_id = u.id) AS urlScans,
+         (SELECT COUNT(*) FROM indicator_lookups il WHERE il.user_id = u.id) AS indicatorLookups,
+         COALESCE(
+           (SELECT SUM(st.duration_seconds)
+            FROM screen_time_sessions st
+            WHERE st.user_id = u.id),
+           0
+         ) AS totalScreenSeconds,
+         (SELECT MAX(sv.visited_at) FROM site_visits sv WHERE sv.user_id = u.id) AS lastVisit,
+         (SELECT MAX(st.last_seen_at)
+          FROM screen_time_sessions st
+          WHERE st.user_id = u.id) AS lastActive
+       FROM users u
+       ORDER BY COALESCE(
+         (SELECT MAX(st.last_seen_at)
+          FROM screen_time_sessions st
+          WHERE st.user_id = u.id),
+         u.created_at
+       ) DESC
+       LIMIT 100`
+    );
+
     const [adminContents] = await db.query(
       `SELECT * FROM admin_contents
        ORDER BY created_at DESC`
     );
+
+    let analytics;
+
+    try {
+      analytics = await getAnalyticsDashboardData();
+    } catch (analyticsError) {
+      console.error("ADMIN ANALYTICS ERROR:", analyticsError.message);
+      analytics = {
+        totalVisits: 0,
+        uniqueVisitors: 0,
+        visitsToday: 0,
+        totalScreenSeconds: 0,
+        averageScreenSeconds: 0,
+        activeVisitors: 0,
+        visitorActivity: [],
+      };
+    }
 
     res.render("admin-dashboard", {
       user: req.session.user,
@@ -148,15 +238,18 @@ router.get("/admin", isAuthenticated, isAdmin, async (req, res) => {
       totalFileScans: fileScanCount.totalFileScans,
       totalUrlScans: urlScanCount.totalUrlScans,
       totalWhoisLookups: whoisCount.totalWhoisLookups,
+      totalIndicatorLookups: indicatorCount.totalIndicatorLookups,
       totalHighRiskFiles: highRiskFileCount.totalHighRiskFiles,
       totalHighRiskUrls: highRiskUrlCount.totalHighRiskUrls,
 
       users,
       recentUsers,
-      recentFileScans,
-      recentUrlScans,
+      recentScans,
       recentWhoisLookups,
+      recentIndicatorLookups,
+      userMonitoring,
       adminContents,
+      analytics,
     });
   } catch (err) {
     console.error("ADMIN DASHBOARD ERROR:", err);

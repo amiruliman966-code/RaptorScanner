@@ -1,28 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home - RaptorScanner</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/futuristic.css">
 </head>
 <body>
 
   <!-- Home Navbar -->
-  <nav class="home-navbar">
-    <div class="home-logo">RaptorScanner</div>
+<nav class="home-navbar" id="homeNavbar">
+  <div class="home-logo"><span class="brand-mark" aria-hidden="true">R</span>RaptorScanner</div>
 
-    <div class="home-nav-center">
-      <a href="#home">Home</a>
-      <a href="#about">About</a>
-      <a href="#features">Features</a>
-    </div>
+  <button
+    type="button"
+    class="home-nav-toggle"
+    id="homeNavToggle"
+    aria-label="Toggle navigation"
+    aria-expanded="false"
+  >
+    &#9776;
+  </button>
 
-    <div class="home-nav-right">
-      <a href="/login" class="login-nav-btn">Login</a>
-      <button id="themeToggle" class="theme-btn">🌙</button>
-    </div>
-  </nav>
+  <div class="home-nav-center">
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#features">Features</a>
+  </div>
+
+  <div class="home-nav-right">
+    <a href="/login" class="login-nav-btn">Login</a>
+  </div>
+</nav>
 
   <%- include("partials/admin-content") %>
 
@@ -44,69 +55,145 @@
         view a simple risk report before opening files.
       </p>
 
-      <a href="/dashboard" class="hero-main-btn">Go to Dashboard</a>
+      <div class="home-hero-actions">
+        <a href="/dashboard" class="hero-main-btn">
+          Go to Dashboard <span aria-hidden="true">&rarr;</span>
+        </a>
+        <a href="#how-it-works" class="home-hero-link">See how it works</a>
+      </div>
     </div>
 
   </section>
 
+  <section class="home-capability-bar" aria-label="RaptorScanner capabilities">
+    <div><strong>ClamAV</strong><span>Malware scanning</span></div>
+    <div><strong>MD5 / SHA</strong><span>File fingerprints</span></div>
+    <div><strong>Safe Browsing</strong><span>URL reputation</span></div>
+    <div><strong>RDAP</strong><span>Domain intelligence</span></div>
+  </section>
+
   <!-- About Website -->
   <section id="about" class="home-about-section">
-    <h2>About Our Website</h2>
+    <div class="home-section-heading">
+      <span>About RaptorScanner</span>
+      <h2>Check first. Open with confidence.</h2>
+    </div>
 
-    <p>
-      RaptorScanner is a web-based malware file analysis dashboard inspired by
-      VirusTotal. It helps users scan uploaded files, generate hash values, and
-      view a simple risk report before opening suspicious files.
-    </p>
+    <div class="home-about-layout">
+      <div class="home-about-copy">
+        <p>
+          Files and links often look harmless at first glance. RaptorScanner
+          gives you a practical way to inspect them before deciding what to do
+          next.
+        </p>
+        <p>
+          Each scan brings the important details into one report: file hashes,
+          malware scan results, URL indicators and previous activity. The goal
+          is simple—make basic security checks easier to understand.
+        </p>
+      </div>
 
-    <p>
-      Many users download files from the internet without checking whether the
-      files are safe. Some files may contain viruses, trojans, worms, or
-      ransomware. RaptorScanner helps users check files through a simple and
-      user-friendly dashboard.
-    </p>
+      <aside class="home-about-note">
+        <span>Built for everyday checks</span>
+        <ul>
+          <li>Review a file before opening it</li>
+          <li>Inspect an unfamiliar link</li>
+          <li>Search earlier scan results</li>
+          <li>Keep a personal scan history</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section id="how-it-works" class="home-process-section">
+    <div class="home-section-heading">
+      <span>How it works</span>
+      <h2>From submission to report in three steps.</h2>
+    </div>
+
+    <div class="home-process-grid">
+      <article>
+        <span>01</span>
+        <h3>Choose what to check</h3>
+        <p>Upload a file, paste a URL or search an existing hash or domain.</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h3>Run the analysis</h3>
+        <p>The relevant scanner checks indicators and collects useful technical details.</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h3>Review the result</h3>
+        <p>Read the risk level, reasons and supporting information before taking action.</p>
+      </article>
+    </div>
   </section>
 
   <!-- Main Features -->
   <section id="features" class="home-features-section">
-    <h2>Main Features</h2>
+    <div class="home-section-heading">
+      <span>Core tools</span>
+      <h2>Everything needed for a quick security check.</h2>
+    </div>
 
     <div class="home-feature-grid">
-      <div class="home-feature-box">
+      <div class="home-feature-box feature-auth">
+        <span class="home-feature-index">01</span>
         <h3>Secure Login</h3>
-        <p>Users can register and log in securely.</p>
+        <p>Keep scan records connected to your own protected account.</p>
       </div>
 
-      <div class="home-feature-box">
+      <div class="home-feature-box feature-upload">
+        <span class="home-feature-index">02</span>
         <h3>File Upload</h3>
         <p>Users can upload files for malware analysis.</p>
       </div>
 
-      <div class="home-feature-box">
+      <div class="home-feature-box feature-hash">
+        <span class="home-feature-index">03</span>
         <h3>Hash Generator</h3>
         <p>The system generates MD5, SHA-1, and SHA-256 hash values.</p>
       </div>
 
-      <div class="home-feature-box">
+      <div class="home-feature-box feature-malware">
+        <span class="home-feature-index">04</span>
         <h3>Malware Scan</h3>
         <p>Uploaded files can be scanned using ClamAV.</p>
       </div>
 
-      <div class="home-feature-box">
+      <div class="home-feature-box feature-url">
+        <span class="home-feature-index">05</span>
         <h3>URL Scan</h3>
         <p>Users can scan URLs and check whether they look suspicious.</p>
       </div>
 
-      <div class="home-feature-box">
+      <div class="home-feature-box feature-history">
+        <span class="home-feature-index">06</span>
         <h3>Scan History</h3>
         <p>Users can view previous file and URL scan results.</p>
       </div>
     </div>
   </section>
 
+  <section class="home-final-cta">
+    <div>
+      <span>Ready to check something?</span>
+      <h2>Start with a file or URL.</h2>
+      <p>Your report stays available in your scan history.</p>
+    </div>
+    <a href="/dashboard">Open Dashboard <span aria-hidden="true">&rarr;</span></a>
+  </section>
+
   <!-- Footer -->
   <footer class="home-footer">
-    <p>RaptorScanner | Final Year Project</p>
+    <div class="home-footer-inner">
+      <div>
+        <strong>RaptorScanner</strong>
+        <p>A practical malware and URL analysis dashboard.</p>
+      </div>
+      <p>Final Year Project &middot; 2026</p>
+    </div>
   </footer>
 
   <script src="/theme.js"></script>

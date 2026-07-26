@@ -141,7 +141,10 @@ CREATE TABLE `users` (
   `google_id` varchar(255) DEFAULT NULL,
   `auth_provider` varchar(50) DEFAULT 'local',
   `facebook_id` varchar(255) DEFAULT NULL,
-  `apple_id` varchar(255) DEFAULT NULL
+  `apple_id` varchar(255) DEFAULT NULL,
+  `role` varchar(20) NOT NULL DEFAULT 'user',
+  `phone` varchar(30) DEFAULT NULL,
+  `profile_picture` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

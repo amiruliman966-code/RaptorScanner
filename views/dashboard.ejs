@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - RaptorScanner</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/futuristic.css">
 </head>
 <body>
 
   <nav class="navbar" id="dashboardNavbar">
-    <div class="logo">RaptorScanner</div>
+    <div class="logo"><span class="brand-mark" aria-hidden="true">R</span>RaptorScanner</div>
 
     <button class="nav-toggle" id="navToggle">☰</button>
 
@@ -29,47 +30,83 @@
   </nav>
 <%- include("partials/admin-content") %>
   <main class="vt-page">
-    <div class="vt-card">
-
-      <div class="vt-tabs">
-        <button class="tab-btn active" onclick="showTab('fileTab', 'file')">FILE</button>
-        <button class="tab-btn" onclick="showTab('urlTab', 'url')">URL</button>
-        <button class="tab-btn" onclick="showTab('searchTab', 'search')">SEARCH</button>
+    <div class="dashboard-workspace">
+      <div class="dashboard-heading">
+        <div>
+          <span class="dashboard-eyebrow">Analysis workspace</span>
+          <h1>Investigate a potential threat</h1>
+          <p>Scan a file, inspect a web address, or look up an existing indicator.</p>
+        </div>
+        <div class="dashboard-ready" aria-label="Scanner status">
+          <span aria-hidden="true"></span>
+          Scanner ready
+        </div>
       </div>
 
-      <!-- FILE TAB -->
-      <div id="fileTab" class="tab-content active">
-        <h1>Upload and Scan File</h1>
-        <p>Scan file using hash generation and ClamAV.</p>
+      <div class="dashboard-grid">
+        <section class="vt-card" aria-label="Threat analysis tools">
+          <div class="vt-tabs" role="tablist" aria-label="Analysis type">
+            <button class="tab-btn active" type="button" role="tab" onclick="showTab('fileTab', 'file')">
+              <span class="tab-number">01</span>
+              <span><strong>File scan</strong><small>Inspect an upload</small></span>
+            </button>
+            <button class="tab-btn" type="button" role="tab" onclick="showTab('urlTab', 'url')">
+              <span class="tab-number">02</span>
+              <span><strong>URL check</strong><small>Review a web address</small></span>
+            </button>
+            <button class="tab-btn" type="button" role="tab" onclick="showTab('searchTab', 'search')">
+              <span class="tab-number">03</span>
+              <span><strong>Indicator lookup</strong><small>Search known data</small></span>
+            </button>
+          </div>
 
-        <form action="/scan" method="POST" enctype="multipart/form-data">
-          <input type="file" name="file" required>
-          <button type="submit">Scan File</button>
-        </form>
+          <div id="fileTab" class="tab-content active" role="tabpanel">
+            <span class="tool-label">Local file analysis</span>
+            <h2>Upload a file for inspection</h2>
+            <p>Generate file hashes and check its contents with ClamAV.</p>
+            <form action="/scan" method="POST" enctype="multipart/form-data">
+              <label class="dashboard-input-label" for="scanFile">Choose the file you want to investigate</label>
+              <input id="scanFile" type="file" name="file" required>
+              <button type="submit">Start file scan <span aria-hidden="true">&rarr;</span></button>
+            </form>
+          </div>
+
+          <div id="urlTab" class="tab-content" role="tabpanel">
+            <span class="tool-label">Web reputation</span>
+            <h2>Check a web address</h2>
+            <p>Review URL signals and Google Safe Browsing reputation before opening it.</p>
+            <form action="/scan-url" method="POST">
+              <label class="dashboard-input-label" for="scanUrl">Website address</label>
+              <input id="scanUrl" type="text" name="url" placeholder="example.com or https://example.com" inputmode="url" autocomplete="url" required>
+              <button type="submit">Analyze URL <span aria-hidden="true">&rarr;</span></button>
+            </form>
+          </div>
+
+          <div id="searchTab" class="tab-content" role="tabpanel">
+            <span class="tool-label">Threat intelligence</span>
+            <h2>Look up an indicator</h2>
+            <p>Search your scan history and WHOIS/RDAP data for a hash, domain, IP address, or URL.</p>
+            <form action="/search" method="POST">
+              <label class="dashboard-input-label" for="searchQuery">Indicator or address</label>
+              <input id="searchQuery" type="text" name="query" placeholder="Hash, domain, IP address, or URL" required>
+              <button type="submit">Search intelligence <span aria-hidden="true">&rarr;</span></button>
+            </form>
+          </div>
+        </section>
+
+        <aside class="dashboard-side-panel">
+          <div class="dashboard-side-heading">
+            <span>Before you scan</span>
+            <h2>Choose the right starting point</h2>
+          </div>
+          <ol class="dashboard-guide-list">
+            <li><span>File</span><p>For downloaded documents, archives, installers, or other local files.</p></li>
+            <li><span>URL</span><p>For an unfamiliar link, domain, or shortened web address.</p></li>
+            <li><span>Lookup</span><p>When you already have an IP address, domain, URL, or file hash.</p></li>
+          </ol>
+          <a href="/history" class="dashboard-history-link">Review scan history <span aria-hidden="true">&rarr;</span></a>
+        </aside>
       </div>
-
-      <!-- URL TAB -->
-      <div id="urlTab" class="tab-content">
-        <h1>Scan URL</h1>
-        <p>Check whether a URL looks suspicious.</p>
-
-        <form action="/scan-url" method="POST">
-          <input type="url" name="url" placeholder="https://example.com" required>
-          <button type="submit">Scan URL</button>
-        </form>
-      </div>
-
-      <!-- SEARCH TAB -->
-      <div id="searchTab" class="tab-content">
-        <h1>Search Threat Data</h1>
-        <p>Search hash, domain, IP address, or URL from your scan history and WHOIS/RDAP lookup.</p>
-
-        <form action="/search" method="POST">
-          <input type="text" name="query" placeholder="Hash, domain, IP address, or URL" required>
-          <button type="submit">Search</button>
-        </form>
-      </div>
-
     </div>
   </main>
 
@@ -79,16 +116,22 @@
       const buttons = document.querySelectorAll(".tab-btn");
 
       tabs.forEach(tab => tab.classList.remove("active"));
-      buttons.forEach(btn => btn.classList.remove("active"));
+      buttons.forEach(btn => {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-selected", "false");
+      });
 
       document.getElementById(tabId).classList.add("active");
 
       if (tabName === "file") {
         buttons[0].classList.add("active");
+        buttons[0].setAttribute("aria-selected", "true");
       } else if (tabName === "url") {
         buttons[1].classList.add("active");
+        buttons[1].setAttribute("aria-selected", "true");
       } else if (tabName === "search") {
         buttons[2].classList.add("active");
+        buttons[2].setAttribute("aria-selected", "true");
       }
 
       localStorage.setItem("activeTab", tabName);

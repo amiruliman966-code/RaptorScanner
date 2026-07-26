@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - RaptorScanner</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/futuristic.css">
 </head>
 <body>
 
   <nav class="navbar" id="dashboardNavbar">
-    <div class="logo">RaptorScanner Admin</div>
+    <div class="logo"><span class="brand-mark" aria-hidden="true">R</span>RaptorScanner <small>Admin</small></div>
 
     <button class="nav-toggle" id="navToggle">☰</button>
 
@@ -17,75 +18,166 @@
       <a href="/">Home</a>
       <a href="/dashboard">Dashboard</a>
       <a href="/history">Scan History</a>
-      <a href="/admin">Admin</a>
+      <a href="/admin" class="active">Admin</a>
       <a href="/logout">Logout</a>
       <button id="themeToggle" class="theme-btn">🌙</button>
     </div>
   </nav>
 
   <main class="admin-page">
+    <%
+      function formatDuration(totalSeconds) {
+        const seconds = Math.max(Number(totalSeconds || 0), 0);
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        if (minutes > 0) return `${minutes}m ${remainingSeconds}s`;
+        return `${remainingSeconds}s`;
+      }
+    %>
 
     <div class="admin-header">
-      <h1>Admin Dashboard</h1>
-      <p>Welcome, <strong><%= user.name %></strong>. Manage and monitor RaptorScanner activity.</p>
+      <div>
+        <span class="admin-eyebrow">System overview</span>
+        <h1>Administration</h1>
+        <p>Monitor usage, review scanner activity, and manage the platform.</p>
+      </div>
+      <div class="admin-user-context">
+        <span>Signed in as</span>
+        <strong><%= user.name %></strong>
+      </div>
     </div>
 
     <div class="admin-summary-grid">
-      <div class="admin-summary-card">
+      <div class="admin-summary-card" data-metric="Users">
         <h2><%= totalUsers %></h2>
         <p>Total Users</p>
       </div>
 
-      <div class="admin-summary-card">
+      <div class="admin-summary-card" data-metric="Files">
         <h2><%= totalFileScans %></h2>
         <p>Total File Scans</p>
       </div>
 
-      <div class="admin-summary-card">
+      <div class="admin-summary-card" data-metric="URLs">
         <h2><%= totalUrlScans %></h2>
         <p>Total URL Scans</p>
       </div>
 
-      <div class="admin-summary-card">
+      <div class="admin-summary-card" data-metric="RDAP">
         <h2><%= totalWhoisLookups %></h2>
         <p>Total WHOIS Lookups</p>
       </div>
+
+      <div class="admin-summary-card" data-metric="Indicators">
+        <h2><%= totalIndicatorLookups %></h2>
+        <p>Indicator Lookups</p>
+      </div>
+
+      <div class="admin-summary-card" data-metric="High risk">
+        <h2><%= Number(totalHighRiskFiles) + Number(totalHighRiskUrls) %></h2>
+        <p>High-risk Findings</p>
+      </div>
     </div>
 
-    <section class="admin-card">
-      <h2>Recent Users</h2>
+    <nav class="admin-section-nav" aria-label="Admin dashboard sections">
+      <a href="#analytics">Analytics</a>
+      <a href="#activity">Visitor activity</a>
+      <a href="#users">User monitoring</a>
+      <a href="#indicators">Indicators</a>
+      <a href="#whois">WHOIS</a>
+      <a href="#recent-scans">Recent scans</a>
+    </nav>
+
+    <section id="analytics" class="admin-card analytics-overview">
+      <div class="admin-card-header">
+        <div>
+          <h2>Website Analytics</h2>
+          <p>Visitor traffic and active screen time across RaptorScanner.</p>
+        </div>
+        <span class="analytics-live-badge">
+          <span class="status-dot"></span>
+          <%= analytics.activeVisitors %> active now
+        </span>
+      </div>
+
+      <div class="analytics-summary-grid">
+        <div class="analytics-summary-card">
+          <span>Total Visits</span>
+          <strong><%= analytics.totalVisits %></strong>
+        </div>
+
+        <div class="analytics-summary-card">
+          <span>Unique Visitors</span>
+          <strong><%= analytics.uniqueVisitors %></strong>
+        </div>
+
+        <div class="analytics-summary-card">
+          <span>Visits Today</span>
+          <strong><%= analytics.visitsToday %></strong>
+        </div>
+
+        <div class="analytics-summary-card">
+          <span>Total Screen Time</span>
+          <strong><%= formatDuration(analytics.totalScreenSeconds) %></strong>
+        </div>
+
+        <div class="analytics-summary-card">
+          <span>Average Per Visitor</span>
+          <strong><%= formatDuration(analytics.averageScreenSeconds) %></strong>
+        </div>
+
+        <div class="analytics-summary-card">
+          <span>Active Visitors</span>
+          <strong><%= analytics.activeVisitors %></strong>
+        </div>
+      </div>
+    </section>
+
+    <section id="activity" class="admin-card">
+      <div class="admin-table-heading">
+        <div>
+          <span>Engagement</span>
+          <h2>User screen time</h2>
+        </div>
+        <p>Time spent and pages opened by each user or visitor.</p>
+      </div>
 
       <div class="table-wrapper">
         <table class="admin-table">
           <thead>
             <tr>
               <th>No</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Registered At</th>
+              <th>User / Visitor</th>
+              <th>Pages Opened</th>
+              <th>Total Screen Time</th>
+              <th>Last Active</th>
             </tr>
           </thead>
-
           <tbody>
-            <% if (recentUsers.length === 0) { %>
+            <% if (analytics.visitorActivity.length === 0) { %>
               <tr>
-                <td colspan="5">No users found.</td>
+                <td colspan="5">No screen-time data recorded yet.</td>
               </tr>
             <% } else { %>
-              <% recentUsers.forEach((item, index) => { %>
+              <% analytics.visitorActivity.forEach((item, index) => { %>
                 <tr>
                   <td><%= index + 1 %></td>
-                  <td><%= item.name %></td>
-                  <td><%= item.email %></td>
                   <td>
-                    <% if (item.role === "admin") { %>
-                      <span class="badge high">Admin</span>
-                    <% } else { %>
-                      <span class="badge low">User</span>
-                    <% } %>
+                    <strong><%= item.visitor_name %></strong><br>
+                    <small><%= item.visitor_email %></small>
                   </td>
-                  <td><%= item.created_at ? item.created_at.toLocaleString() : "-" %></td>
+                  <td><%= item.pagesViewed %></td>
+                  <td>
+                    <span class="analytics-time">
+                      <%= formatDuration(item.totalSeconds) %>
+                    </span>
+                  </td>
+                  <td>
+                    <%= item.lastActive ? item.lastActive.toLocaleString() : "-" %>
+                  </td>
                 </tr>
               <% }) %>
             <% } %>
@@ -94,8 +186,66 @@
       </div>
     </section>
 
-    <section class="admin-card">
-      <h2>Recent File Scans</h2>
+    <section id="users" class="admin-card">
+      <div class="admin-table-heading">
+        <div>
+          <span>Accounts and usage</span>
+          <h2>User monitoring</h2>
+        </div>
+        <p>Account information and platform activity. Password data is never retrieved.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Account</th>
+              <th>File Scans</th>
+              <th>URL Scans</th>
+              <th>Lookups</th>
+              <th>Screen Time</th>
+              <th>Last Active</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% if (userMonitoring.length === 0) { %>
+              <tr>
+                <td colspan="7">No users found.</td>
+              </tr>
+            <% } else { %>
+              <% userMonitoring.forEach((item) => { %>
+                <tr>
+                  <td>
+                    <strong><%= item.name %></strong><br>
+                    <small><%= item.email %></small>
+                  </td>
+                  <td>
+                    <span class="admin-account-role"><%= item.role %></span><br>
+                    <small><%= item.auth_provider || "local" %> · Joined <%= item.created_at ? item.created_at.toLocaleDateString("en-MY") : "-" %></small>
+                  </td>
+                  <td><%= item.fileScans %></td>
+                  <td><%= item.urlScans %></td>
+                  <td><%= item.indicatorLookups %></td>
+                  <td><span class="analytics-time"><%= formatDuration(item.totalScreenSeconds) %></span></td>
+                  <td><%= item.lastActive ? item.lastActive.toLocaleString() : (item.lastVisit ? item.lastVisit.toLocaleString() : "No activity yet") %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="indicators" class="admin-card">
+      <div class="admin-table-heading">
+        <div>
+          <span>Threat intelligence</span>
+          <h2>Recent indicator lookups</h2>
+        </div>
+        <p>Latest hash, URL, domain and IP searches performed by users.</p>
+      </div>
 
       <div class="table-wrapper">
         <table class="admin-table">
@@ -103,35 +253,24 @@
             <tr>
               <th>No</th>
               <th>User</th>
-              <th>File Name</th>
-              <th>Scan Result</th>
-              <th>Risk</th>
+              <th>Indicator</th>
+              <th>Type</th>
+              <th>Result</th>
               <th>Date</th>
             </tr>
           </thead>
-
           <tbody>
-            <% if (recentFileScans.length === 0) { %>
-              <tr>
-                <td colspan="6">No file scans found.</td>
-              </tr>
+            <% if (recentIndicatorLookups.length === 0) { %>
+              <tr><td colspan="6">No indicator lookups found.</td></tr>
             <% } else { %>
-              <% recentFileScans.forEach((item, index) => { %>
+              <% recentIndicatorLookups.forEach((item, index) => { %>
                 <tr>
                   <td><%= index + 1 %></td>
-                  <td><%= item.user_name %><br><small><%= item.user_email %></small></td>
-                  <td><%= item.original_name %></td>
-                  <td><%= item.scan_result %></td>
-                  <td>
-                    <% if (item.risk_level === "High") { %>
-                      <span class="badge high">High</span>
-                    <% } else if (item.risk_level === "Medium") { %>
-                      <span class="badge medium">Medium</span>
-                    <% } else { %>
-                      <span class="badge low">Low</span>
-                    <% } %>
-                  </td>
-                  <td><%= item.scanned_at ? item.scanned_at.toLocaleString() : "-" %></td>
+                  <td><strong><%= item.user_name %></strong><br><small><%= item.user_email %></small></td>
+                  <td class="break-text"><%= item.query %></td>
+                  <td><span class="indicator-type-badge"><%= item.search_type %></span></td>
+                  <td><%= item.result_summary %></td>
+                  <td><%= item.checked_at ? item.checked_at.toLocaleString() : "-" %></td>
                 </tr>
               <% }) %>
             <% } %>
@@ -140,8 +279,14 @@
       </div>
     </section>
 
-    <section class="admin-card">
-      <h2>Recent URL Scans</h2>
+    <section id="whois" class="admin-card">
+      <div class="admin-table-heading">
+        <div>
+          <span>Registration data</span>
+          <h2>Recent WHOIS / RDAP lookups</h2>
+        </div>
+        <p>Domain and IP registration checks performed across the platform.</p>
+      </div>
 
       <div class="table-wrapper">
         <table class="admin-table">
@@ -149,26 +294,73 @@
             <tr>
               <th>No</th>
               <th>User</th>
-              <th>URL</th>
+              <th>Query</th>
               <th>Domain</th>
-              <th>Status</th>
+              <th>Registrar</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (recentWhoisLookups.length === 0) { %>
+              <tr><td colspan="6">No WHOIS or RDAP lookups found.</td></tr>
+            <% } else { %>
+              <% recentWhoisLookups.forEach((item, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><strong><%= item.user_name %></strong><br><small><%= item.user_email %></small></td>
+                  <td class="break-text"><%= item.query %></td>
+                  <td class="break-text"><%= item.domain %></td>
+                  <td><%= item.registrar || "Not available" %></td>
+                  <td><%= item.checked_at ? item.checked_at.toLocaleString() : "-" %></td>
+                </tr>
+              <% }) %>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="recent-scans" class="admin-card">
+      <div class="admin-table-heading">
+        <div>
+          <span>Scanner activity</span>
+          <h2>Recent scans</h2>
+        </div>
+        <p>Latest file and URL scans, combined and ordered by activity time.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Type</th>
+              <th>User</th>
+              <th>Target</th>
+              <th>Details</th>
+              <th>Result</th>
               <th>Risk</th>
               <th>Date</th>
             </tr>
           </thead>
 
           <tbody>
-            <% if (recentUrlScans.length === 0) { %>
+            <% if (recentScans.length === 0) { %>
               <tr>
-                <td colspan="7">No URL scans found.</td>
+                <td colspan="8">No file or URL scans found.</td>
               </tr>
             <% } else { %>
-              <% recentUrlScans.forEach((item, index) => { %>
+              <% recentScans.forEach((item, index) => { %>
                 <tr>
                   <td><%= index + 1 %></td>
-                  <td><%= item.user_name %><br><small><%= item.user_email %></small></td>
-                  <td class="break-text"><%= item.url %></td>
-                  <td class="break-text"><%= item.domain %></td>
+                  <td>
+                    <span class="admin-scan-type <%= item.scan_type === 'File' ? 'is-file' : 'is-url' %>">
+                      <%= item.scan_type %>
+                    </span>
+                  </td>
+                  <td><strong><%= item.user_name %></strong><br><small><%= item.user_email %></small></td>
+                  <td class="break-text"><%= item.target %></td>
+                  <td class="break-text"><%= item.target_detail %></td>
                   <td><%= item.scan_result %></td>
                   <td>
                     <% if (item.risk_level === "High") { %>
@@ -190,6 +382,50 @@
 
   </main>
 
+  <button id="adminBackToTop" class="admin-back-to-top" type="button" aria-label="Back to top">
+    &uarr;
+  </button>
+
   <script src="/theme.js"></script>
+  <script>
+    const sectionLinks = Array.from(document.querySelectorAll(".admin-section-nav a"));
+    const backToTop = document.getElementById("adminBackToTop");
+
+    sectionLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        sectionLinks.forEach((item) => item.classList.remove("active"));
+        link.classList.add("active");
+      });
+    });
+
+    const observedSections = sectionLinks
+      .map((link) => document.querySelector(link.getAttribute("href")))
+      .filter(Boolean);
+
+    if ("IntersectionObserver" in window) {
+      const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          sectionLinks.forEach((link) => {
+            link.classList.toggle(
+              "active",
+              link.getAttribute("href") === `#${entry.target.id}`
+            );
+          });
+        });
+      }, { rootMargin: "-20% 0px -68% 0px" });
+
+      observedSections.forEach((section) => sectionObserver.observe(section));
+    }
+
+    window.addEventListener("scroll", () => {
+      backToTop.classList.toggle("is-visible", window.scrollY > 600);
+    }, { passive: true });
+
+    backToTop.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  </script>
 </body>
 </html>

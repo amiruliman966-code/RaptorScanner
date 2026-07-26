@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scan History - RaptorScanner</title>
   <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/futuristic.css">
 </head>
 <body>
 
@@ -32,7 +33,7 @@
 
     <div class="history-header">
       <h1>Scan History</h1>
-      <p>View your previous file and URL scan records.</p>
+      <p>View your previous file scans, URL checks, and indicator lookups.</p>
     </div>
 
     <div class="history-card">
@@ -44,6 +45,10 @@
 
         <button type="button" class="history-tab-btn" onclick="showHistoryTab('url')">
           URL History
+        </button>
+
+        <button type="button" class="history-tab-btn" onclick="showHistoryTab('indicator')">
+          Indicator Lookup
         </button>
       </div>
 
@@ -114,6 +119,41 @@
                     <td class="break-text"><%= scan.sha1_hash %></td>
                     <td class="break-text"><%= scan.sha256_hash %></td>
                     <td><%= new Date(scan.scanned_at).toLocaleString() %></td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- INDICATOR LOOKUP HISTORY -->
+      <section id="indicatorHistoryTab" class="history-tab-content">
+        <div class="table-wrapper">
+          <table id="indicatorHistoryTable" class="history-table datatable-style">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Indicator</th>
+                <th>Type</th>
+                <th>Result</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% if (!indicatorLookups || indicatorLookups.length === 0) { %>
+                <tr class="empty-row">
+                  <td colspan="5">No indicator lookup history found.</td>
+                </tr>
+              <% } else { %>
+                <% indicatorLookups.forEach((lookup, index) => { %>
+                  <tr class="history-data-row">
+                    <td><%= index + 1 %></td>
+                    <td class="break-text"><%= lookup.query %></td>
+                    <td><span class="indicator-type-badge"><%= lookup.search_type %></span></td>
+                    <td><%= lookup.result_summary %></td>
+                    <td><%= new Date(lookup.checked_at).toLocaleString() %></td>
                   </tr>
                 <% }) %>
               <% } %>
@@ -205,7 +245,11 @@
         return document.getElementById("fileHistoryTable");
       }
 
-      return document.getElementById("urlHistoryTable");
+      if (activeHistoryType === "url") {
+        return document.getElementById("urlHistoryTable");
+      }
+
+      return document.getElementById("indicatorHistoryTable");
     }
 
     function showHistoryTab(type) {
@@ -214,19 +258,24 @@
 
       const fileTab = document.getElementById("fileHistoryTab");
       const urlTab = document.getElementById("urlHistoryTab");
+      const indicatorTab = document.getElementById("indicatorHistoryTab");
       const buttons = document.querySelectorAll(".history-tab-btn");
 
       fileTab.classList.remove("active");
       urlTab.classList.remove("active");
+      indicatorTab.classList.remove("active");
 
       buttons.forEach((btn) => btn.classList.remove("active"));
 
       if (type === "file") {
         fileTab.classList.add("active");
         buttons[0].classList.add("active");
-      } else {
+      } else if (type === "url") {
         urlTab.classList.add("active");
         buttons[1].classList.add("active");
+      } else {
+        indicatorTab.classList.add("active");
+        buttons[2].classList.add("active");
       }
 
       document.getElementById("historySearch").value = "";

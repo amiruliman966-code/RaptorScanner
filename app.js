@@ -1,7 +1,8 @@
+require("dotenv").config();
+
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
-require("dotenv").config();
 
 const db = require("./config/db");
 const passport = require("./config/passport");
@@ -10,6 +11,14 @@ const authRoutes = require("./routes/authRoutes");
 const scanRoutes = require("./routes/scanRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const profileRoutes = require("./routes/profileRoutes");
+const {
+  analyticsRouter,
+  initializeAnalyticsTables,
+  trackPageView,
+} = require("./services/analyticsService");
+const {
+  initializeIndicatorHistoryTable,
+} = require("./services/indicatorHistoryService");
 
 const app = express();
 
@@ -17,10 +26,14 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Static files
-app.use(express.static("public"));
+// ================= STATIC FILES =================
+app.use(express.static(path.join(__dirname, "public")));
 
-// Prevent browser cache after logout
+// If you use uploaded profile pictures or uploaded files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
+
+// ================= PREVENT CACHE AFTER LOGOUT =================
 app.use((req, res, next) => {
   res.set("Cache-Control", "no-store");
   next();
@@ -36,11 +49,18 @@ app.use(
     secret: process.env.SESSION_SECRET || "raptorscanner_secret_key",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    },
   })
 );
 
 // ================= PASSPORT SETUP =================
 app.use(passport.initialize());
+
+// ================= PRIVACY-FRIENDLY SITE ANALYTICS =================
+app.use(trackPageView);
+app.use(analyticsRouter);
 
 // ================= ADMIN CONTENT MIDDLEWARE =================
 // This allows admin-added text/images/ads to appear on selected pages
@@ -110,6 +130,30 @@ app.use((req, res) => {
 // ================= START SERVER =================
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`RaptorScanner running on http://localhost:${PORT}`);
-});
+async function startServer() {
+  try {
+    await initializeAnalyticsTables();
+    console.log("Analytics tables ready");
+  } catch (error) {
+    console.error("ANALYTICS TABLE SETUP ERROR:", error.message);
+  }
+
+  try {
+    await initializeIndicatorHistoryTable();
+    console.log("Indicator history table ready");
+  } catch (error) {
+    console.error("INDICATOR HISTORY TABLE SETUP ERROR:", error.message);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`RaptorScanner running on http://localhost:${PORT}`);
+
+    if (process.env.GOOGLE_CLIENT_ID) {
+      console.log("Google Client ID loaded");
+    } else {
+      console.log("Google Client ID missing");
+    }
+  });
+}
+
+startServer();
