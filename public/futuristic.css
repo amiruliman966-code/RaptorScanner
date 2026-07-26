@@ -2982,6 +2982,59 @@ body.dark-mode .local-intelligence-result .hash-row {
   cursor: pointer;
 }
 
+.nav-toggle {
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0 !important;
+  border: 1px solid #40506a;
+  border-radius: 10px;
+  background: #172238;
+}
+
+.nav-toggle:hover {
+  border-color: #5b708d;
+  background: #202d44;
+}
+
+.nav-toggle:focus-visible {
+  outline: 2px solid #4bb4a7;
+  outline-offset: 2px;
+}
+
+.nav-toggle-lines {
+  display: grid;
+  width: 20px;
+  gap: 4px;
+}
+
+.nav-toggle-lines i {
+  display: block;
+  width: 20px;
+  height: 2px;
+  border-radius: 999px;
+  background: #f3f7fb;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+#dashboardNavbar.active .nav-toggle-lines i:nth-child(1),
+#loginNavbar.active .nav-toggle-lines i:nth-child(1),
+.navbar.active .nav-toggle-lines i:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+#dashboardNavbar.active .nav-toggle-lines i:nth-child(2),
+#loginNavbar.active .nav-toggle-lines i:nth-child(2),
+.navbar.active .nav-toggle-lines i:nth-child(2) {
+  opacity: 0;
+}
+
+#dashboardNavbar.active .nav-toggle-lines i:nth-child(3),
+#loginNavbar.active .nav-toggle-lines i:nth-child(3),
+.navbar.active .nav-toggle-lines i:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
 .nav-profile-dropdown {
   width: min(340px, calc(100vw - 24px));
   position: absolute;
@@ -3304,6 +3357,12 @@ body.compact-mode .history-table td {
 }
 
 @media (max-width: 768px) {
+  #dashboardNavbar .nav-toggle,
+  #loginNavbar .nav-toggle,
+  .navbar .nav-toggle {
+    display: grid !important;
+  }
+
   #dashboardNavbar .nav-profile-menu {
     align-self: flex-end;
   }

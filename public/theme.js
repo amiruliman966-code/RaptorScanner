@@ -71,13 +71,8 @@ const navbar =
 
 if (navToggle && navbar) {
   navToggle.addEventListener("click", function () {
-    navbar.classList.toggle("active");
-
-    if (navbar.classList.contains("active")) {
-      navToggle.textContent = "âœ•";
-    } else {
-      navToggle.textContent = "â˜°";
-    }
+    const isOpen = navbar.classList.toggle("active");
+    navToggle.setAttribute("aria-expanded", String(isOpen));
   });
 }
 
