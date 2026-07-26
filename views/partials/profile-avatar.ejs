@@ -1,0 +1,7 @@
+<a href="/profile" class="nav-profile-avatar" aria-label="Open profile" title="Profile">
+  <% if (user && user.profile_picture) { %>
+    <img src="<%= user.profile_picture %>" alt="">
+  <% } else { %>
+    <span aria-hidden="true"><%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %></span>
+  <% } %>
+</a>

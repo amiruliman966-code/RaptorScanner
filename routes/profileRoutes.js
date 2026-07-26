@@ -209,6 +209,7 @@ router.post(
       );
 
       req.session.user.name = name.trim();
+      req.session.user.profile_picture = profilePicture;
 
       const updatedProfileUser = await getProfileUser(req.session.user.id);
 

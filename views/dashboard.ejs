@@ -18,13 +18,12 @@
       <a href="/">Home</a>
       <a href="/dashboard">Dashboard</a>
       <a href="/history">Scan History</a>
-      <a href="/profile">Profile</a>
-
       <% if (user && user.role === "admin") { %>
         <a href="/admin">Admin</a>
       <% } %>
 
       <a href="/logout">Logout</a>
+      <%- include("partials/profile-avatar") %>
       <button id="themeToggle" class="theme-btn">🌙</button>
     </div>
   </nav>
