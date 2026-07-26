@@ -1,7 +1,47 @@
-<a href="/profile" class="nav-profile-avatar" aria-label="Open profile" title="Profile">
-  <% if (user && user.profile_picture) { %>
-    <img src="<%= user.profile_picture %>" alt="">
-  <% } else { %>
-    <span aria-hidden="true"><%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %></span>
-  <% } %>
-</a>
+<div class="nav-profile-menu">
+  <button
+    type="button"
+    class="nav-profile-avatar"
+    aria-label="Open profile menu"
+    aria-expanded="false"
+    aria-haspopup="menu"
+  >
+    <% if (user && user.profile_picture) { %>
+      <img src="<%= user.profile_picture %>" alt="">
+    <% } else { %>
+      <span aria-hidden="true"><%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %></span>
+    <% } %>
+  </button>
+
+  <div class="nav-profile-dropdown" role="menu" hidden>
+    <a href="/profile" class="nav-profile-summary" role="menuitem">
+      <span class="nav-profile-summary-avatar">
+        <% if (user && user.profile_picture) { %>
+          <img src="<%= user.profile_picture %>" alt="">
+        <% } else { %>
+          <span aria-hidden="true"><%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %></span>
+        <% } %>
+      </span>
+      <span>
+        <strong><%= user && user.name ? user.name : "Profile" %></strong>
+        <small>View your profile</small>
+      </span>
+    </a>
+
+    <div class="nav-profile-dropdown-divider"></div>
+
+    <button type="button" class="nav-profile-dropdown-action" data-display-accessibility role="menuitem">
+      <span class="nav-profile-action-icon" aria-hidden="true">&#9680;</span>
+      <span>
+        <strong>Display &amp; accessibility</strong>
+        <small data-theme-description>Change appearance</small>
+      </span>
+      <span class="nav-profile-action-arrow" aria-hidden="true">&rsaquo;</span>
+    </button>
+
+    <a href="/logout" class="nav-profile-dropdown-action" role="menuitem">
+      <span class="nav-profile-action-icon" aria-hidden="true">&#10140;</span>
+      <span><strong>Log out</strong></span>
+    </a>
+  </div>
+</div>

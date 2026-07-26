@@ -53,6 +53,56 @@ if (navToggle && navbar) {
     }
   });
 }
+
+// ================= PROFILE MENU =================
+document.querySelectorAll(".nav-profile-menu").forEach((profileMenu) => {
+  const trigger = profileMenu.querySelector(".nav-profile-avatar");
+  const dropdown = profileMenu.querySelector(".nav-profile-dropdown");
+  const displayButton = profileMenu.querySelector("[data-display-accessibility]");
+  const themeDescription = profileMenu.querySelector("[data-theme-description]");
+
+  if (!trigger || !dropdown) return;
+
+  function setMenuOpen(isOpen) {
+    dropdown.hidden = !isOpen;
+    trigger.setAttribute("aria-expanded", String(isOpen));
+    profileMenu.classList.toggle("is-open", isOpen);
+  }
+
+  function updateThemeDescription() {
+    if (!themeDescription) return;
+    themeDescription.textContent = body.classList.contains("dark-mode")
+      ? "Switch to light mode"
+      : "Switch to dark mode";
+  }
+
+  trigger.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setMenuOpen(dropdown.hidden);
+  });
+
+  if (displayButton) {
+    displayButton.addEventListener("click", () => {
+      applyTheme(body.classList.contains("dark-mode") ? "light" : "dark");
+      updateThemeDescription();
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    if (!profileMenu.contains(event.target)) {
+      setMenuOpen(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !dropdown.hidden) {
+      setMenuOpen(false);
+      trigger.focus();
+    }
+  });
+
+  updateThemeDescription();
+});
 // ================= HOME NAVIGATION =================
 const homeNavToggle = document.getElementById("homeNavToggle");
 const homeNavbar = document.getElementById("homeNavbar");
