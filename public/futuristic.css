@@ -667,42 +667,11 @@ body.dark-mode .login-box {
 .login-password-field {
   position: relative;
   margin-bottom: 15px;
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  border-radius: 11px;
-  background: rgba(248, 250, 252, 0.8);
-  transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .login-password-field input {
-  min-height: 62px;
   margin-bottom: 0;
-  padding: 25px 54px 7px 15px;
-  border: 0;
-  border-radius: inherit;
-  background: transparent;
-  box-shadow: none;
-}
-
-.login-password-field input:focus {
-  border: 0;
-  outline: 0;
-  box-shadow: none;
-}
-
-.login-password-field:focus-within {
-  border-color: #3182ce;
-  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.16);
-}
-
-.login-password-field > label {
-  position: absolute;
-  top: 7px;
-  left: 15px;
-  z-index: 1;
-  color: #667386;
-  font-size: 0.72rem;
-  font-weight: 600;
-  pointer-events: none;
+  padding-right: 54px;
 }
 
 .login-password-toggle {
@@ -711,12 +680,12 @@ body.dark-mode .login-box {
   height: 42px;
   position: absolute;
   top: 50%;
-  right: 8px;
+  right: 7px;
   place-items: center;
   padding: 0;
   color: #526174;
   border: 0;
-  border-radius: 50%;
+  border-radius: 8px;
   background: transparent;
   cursor: pointer;
   transform: translateY(-50%);
@@ -725,11 +694,6 @@ body.dark-mode .login-box {
 .login-password-toggle:hover {
   color: #172033;
   background: rgba(100, 116, 139, 0.1);
-}
-
-.login-password-toggle:focus-visible {
-  outline: 2px solid #3182ce;
-  outline-offset: 1px;
 }
 
 .login-password-toggle svg {
@@ -748,20 +712,6 @@ body.dark-mode .login-box {
 
 body.dark-mode .login-password-toggle {
   color: #c6d0dd;
-}
-
-body.dark-mode .login-password-field {
-  border-color: #40506a;
-  background: #151f30;
-}
-
-body.dark-mode .login-password-field input {
-  border: 0;
-  background: transparent;
-}
-
-body.dark-mode .login-password-field > label {
-  color: #9eabbc;
 }
 
 body.dark-mode .login-password-toggle:hover {
