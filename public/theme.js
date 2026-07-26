@@ -2,10 +2,25 @@
 const themeToggle = document.getElementById("themeToggle");
 const body = document.body;
 
-const savedTheme = localStorage.getItem("theme") || "dark";
+const savedTheme =
+  localStorage.getItem("displayTheme") ||
+  localStorage.getItem("theme") ||
+  "dark";
+
+function resolveTheme(theme) {
+  if (theme === "automatic") {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+
+  return theme;
+}
 
 function applyTheme(theme) {
-  if (theme === "dark") {
+  const resolvedTheme = resolveTheme(theme);
+
+  if (resolvedTheme === "dark") {
     body.classList.add("dark-mode");
 
     if (themeToggle) {
@@ -19,10 +34,22 @@ function applyTheme(theme) {
     }
   }
 
-  localStorage.setItem("theme", theme);
+  localStorage.setItem("theme", resolvedTheme);
+  localStorage.setItem("displayTheme", theme);
 }
 
 applyTheme(savedTheme);
+body.classList.toggle(
+  "compact-mode",
+  localStorage.getItem("compactMode") === "on"
+);
+
+const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+systemTheme.addEventListener("change", () => {
+  if (localStorage.getItem("displayTheme") === "automatic") {
+    applyTheme("automatic");
+  }
+});
 
 if (themeToggle) {
   themeToggle.addEventListener("click", function () {
@@ -59,7 +86,11 @@ document.querySelectorAll(".nav-profile-menu").forEach((profileMenu) => {
   const trigger = profileMenu.querySelector(".nav-profile-avatar");
   const dropdown = profileMenu.querySelector(".nav-profile-dropdown");
   const displayButton = profileMenu.querySelector("[data-display-accessibility]");
-  const themeDescription = profileMenu.querySelector("[data-theme-description]");
+  const mainView = profileMenu.querySelector("[data-profile-main-view]");
+  const displayView = profileMenu.querySelector("[data-display-view]");
+  const backButton = profileMenu.querySelector("[data-display-back]");
+  const themeOptions = profileMenu.querySelectorAll("[data-theme-option]");
+  const compactOptions = profileMenu.querySelectorAll("[data-compact-option]");
 
   if (!trigger || !dropdown) return;
 
@@ -67,13 +98,31 @@ document.querySelectorAll(".nav-profile-menu").forEach((profileMenu) => {
     dropdown.hidden = !isOpen;
     trigger.setAttribute("aria-expanded", String(isOpen));
     profileMenu.classList.toggle("is-open", isOpen);
+
+    if (!isOpen && mainView && displayView) {
+      mainView.hidden = false;
+      displayView.hidden = true;
+    }
   }
 
-  function updateThemeDescription() {
-    if (!themeDescription) return;
-    themeDescription.textContent = body.classList.contains("dark-mode")
-      ? "Switch to light mode"
-      : "Switch to dark mode";
+  function updateDisplayControls() {
+    const themePreference =
+      localStorage.getItem("displayTheme") ||
+      localStorage.getItem("theme") ||
+      "dark";
+    const compactPreference = localStorage.getItem("compactMode") || "off";
+
+    themeOptions.forEach((option) => {
+      const isSelected = option.dataset.themeOption === themePreference;
+      option.classList.toggle("is-selected", isSelected);
+      option.setAttribute("aria-checked", String(isSelected));
+    });
+
+    compactOptions.forEach((option) => {
+      const isSelected = option.dataset.compactOption === compactPreference;
+      option.classList.toggle("is-selected", isSelected);
+      option.setAttribute("aria-checked", String(isSelected));
+    });
   }
 
   trigger.addEventListener("click", (event) => {
@@ -83,10 +132,35 @@ document.querySelectorAll(".nav-profile-menu").forEach((profileMenu) => {
 
   if (displayButton) {
     displayButton.addEventListener("click", () => {
-      applyTheme(body.classList.contains("dark-mode") ? "light" : "dark");
-      updateThemeDescription();
+      if (!mainView || !displayView) return;
+      mainView.hidden = true;
+      displayView.hidden = false;
+      updateDisplayControls();
     });
   }
+
+  if (backButton) {
+    backButton.addEventListener("click", () => {
+      mainView.hidden = false;
+      displayView.hidden = true;
+    });
+  }
+
+  themeOptions.forEach((option) => {
+    option.addEventListener("click", () => {
+      applyTheme(option.dataset.themeOption);
+      updateDisplayControls();
+    });
+  });
+
+  compactOptions.forEach((option) => {
+    option.addEventListener("click", () => {
+      const compactPreference = option.dataset.compactOption;
+      localStorage.setItem("compactMode", compactPreference);
+      body.classList.toggle("compact-mode", compactPreference === "on");
+      updateDisplayControls();
+    });
+  });
 
   document.addEventListener("click", (event) => {
     if (!profileMenu.contains(event.target)) {
@@ -101,7 +175,7 @@ document.querySelectorAll(".nav-profile-menu").forEach((profileMenu) => {
     }
   });
 
-  updateThemeDescription();
+  updateDisplayControls();
 });
 // ================= HOME NAVIGATION =================
 const homeNavToggle = document.getElementById("homeNavToggle");

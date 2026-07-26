@@ -13,35 +13,75 @@
     <% } %>
   </button>
 
-  <div class="nav-profile-dropdown" role="menu" hidden>
-    <a href="/profile" class="nav-profile-summary" role="menuitem">
-      <span class="nav-profile-summary-avatar">
-        <% if (user && user.profile_picture) { %>
-          <img src="<%= user.profile_picture %>" alt="">
-        <% } else { %>
-          <span aria-hidden="true"><%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %></span>
-        <% } %>
-      </span>
-      <span>
-        <strong><%= user && user.name ? user.name : "Profile" %></strong>
-        <small>View your profile</small>
-      </span>
-    </a>
+  <div class="nav-profile-dropdown" hidden>
+    <div class="nav-profile-main-view" data-profile-main-view>
+      <a href="/profile" class="nav-profile-summary">
+        <span class="nav-profile-summary-avatar">
+          <% if (user && user.profile_picture) { %>
+            <img src="<%= user.profile_picture %>" alt="">
+          <% } else { %>
+            <span aria-hidden="true"><%= user && user.name ? user.name.charAt(0).toUpperCase() : "U" %></span>
+          <% } %>
+        </span>
+        <span>
+          <strong><%= user && user.name ? user.name : "Profile" %></strong>
+          <small>View your profile</small>
+        </span>
+      </a>
 
-    <div class="nav-profile-dropdown-divider"></div>
+      <div class="nav-profile-dropdown-divider"></div>
 
-    <button type="button" class="nav-profile-dropdown-action" data-display-accessibility role="menuitem">
-      <span class="nav-profile-action-icon" aria-hidden="true">&#9680;</span>
-      <span>
-        <strong>Display &amp; accessibility</strong>
-        <small data-theme-description>Change appearance</small>
-      </span>
-      <span class="nav-profile-action-arrow" aria-hidden="true">&rsaquo;</span>
-    </button>
+      <button type="button" class="nav-profile-dropdown-action" data-display-accessibility>
+        <span class="nav-profile-action-icon" aria-hidden="true">&#9680;</span>
+        <span>
+          <strong>Display &amp; accessibility</strong>
+          <small>Theme and content density</small>
+        </span>
+        <span class="nav-profile-action-arrow" aria-hidden="true">&rsaquo;</span>
+      </button>
 
-    <a href="/logout" class="nav-profile-dropdown-action" role="menuitem">
-      <span class="nav-profile-action-icon" aria-hidden="true">&#10140;</span>
-      <span><strong>Log out</strong></span>
-    </a>
+      <a href="/logout" class="nav-profile-dropdown-action">
+        <span class="nav-profile-action-icon" aria-hidden="true">&#10140;</span>
+        <span><strong>Log out</strong></span>
+      </a>
+    </div>
+
+    <div class="nav-display-view" data-display-view hidden>
+      <div class="nav-display-heading">
+        <button type="button" data-display-back aria-label="Back to profile menu">&larr;</button>
+        <h2>Display &amp; accessibility</h2>
+      </div>
+
+      <section class="nav-display-section">
+        <div class="nav-display-section-title">
+          <span class="nav-profile-action-icon" aria-hidden="true">&#9790;</span>
+          <div>
+            <h3>Dark mode</h3>
+            <p>Adjust the appearance to reduce glare and give your eyes a break.</p>
+          </div>
+        </div>
+        <div class="nav-display-options" role="radiogroup" aria-label="Dark mode">
+          <button type="button" data-theme-option="light"><span>Off</span><i></i></button>
+          <button type="button" data-theme-option="dark"><span>On</span><i></i></button>
+          <button type="button" data-theme-option="automatic">
+            <span><strong>Automatic</strong><small>Follow your device system setting.</small></span><i></i>
+          </button>
+        </div>
+      </section>
+
+      <section class="nav-display-section">
+        <div class="nav-display-section-title">
+          <span class="nav-profile-action-icon" aria-hidden="true">A</span>
+          <div>
+            <h3>Compact mode</h3>
+            <p>Use smaller spacing so more content fits on the screen.</p>
+          </div>
+        </div>
+        <div class="nav-display-options" role="radiogroup" aria-label="Compact mode">
+          <button type="button" data-compact-option="off"><span>Off</span><i></i></button>
+          <button type="button" data-compact-option="on"><span>On</span><i></i></button>
+        </div>
+      </section>
+    </div>
   </div>
 </div>

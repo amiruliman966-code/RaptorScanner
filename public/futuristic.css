@@ -3075,6 +3075,179 @@ body.dark-mode .nav-profile-action-icon {
   background: #2a364a;
 }
 
+.nav-display-view[hidden],
+.nav-profile-main-view[hidden] {
+  display: none;
+}
+
+.nav-display-heading {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 2px 2px 12px;
+  border-bottom: 1px solid #e1e7ed;
+}
+
+.nav-display-heading button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: #172033;
+  font-size: 1.15rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.nav-display-heading button:hover {
+  background: #edf1f4;
+}
+
+.nav-display-heading h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 1.08rem;
+  letter-spacing: -0.025em;
+}
+
+.nav-display-section {
+  padding: 16px 3px 5px;
+}
+
+.nav-display-section + .nav-display-section {
+  margin-top: 7px;
+  border-top: 1px solid #e1e7ed;
+}
+
+.nav-display-section-title {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 11px;
+}
+
+.nav-display-section-title h3 {
+  margin: 1px 0 3px;
+  color: #172033;
+  font-size: 0.9rem;
+}
+
+.nav-display-section-title p {
+  margin: 0;
+  color: #748092;
+  font-size: 0.73rem;
+  line-height: 1.4;
+}
+
+.nav-display-options {
+  display: grid;
+  gap: 1px;
+  margin: 9px 0 0 49px;
+}
+
+.nav-display-options button {
+  display: flex;
+  width: 100%;
+  min-height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 7px 4px;
+  color: #172033;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.nav-display-options button > span {
+  display: grid;
+  gap: 2px;
+  font-size: 0.82rem;
+}
+
+.nav-display-options button small {
+  color: #748092;
+  font-size: 0.68rem;
+  font-weight: 400;
+}
+
+.nav-display-options button i {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  position: relative;
+  border: 2px solid #697481;
+  border-radius: 50%;
+}
+
+.nav-display-options button.is-selected i {
+  border-color: #176b62;
+}
+
+.nav-display-options button.is-selected i::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #176b62;
+}
+
+body.dark-mode .nav-display-heading,
+body.dark-mode .nav-display-section + .nav-display-section {
+  border-color: #344158;
+}
+
+body.dark-mode .nav-display-heading button,
+body.dark-mode .nav-display-heading h2,
+body.dark-mode .nav-display-section-title h3,
+body.dark-mode .nav-display-options button {
+  color: #eef3f8;
+}
+
+body.dark-mode .nav-display-heading button:hover {
+  background: #202c40;
+}
+
+body.dark-mode .nav-display-section-title p,
+body.dark-mode .nav-display-options button small {
+  color: #aab6c6;
+}
+
+/* Compact mode is limited to authenticated application surfaces. */
+body.compact-mode .navbar {
+  min-height: 62px;
+}
+
+body.compact-mode .vt-page,
+body.compact-mode .history-container,
+body.compact-mode .profile-v2-page,
+body.compact-mode .admin-page,
+body.compact-mode .scan-result-page,
+body.compact-mode .advanced-result-page,
+body.compact-mode .result-container {
+  padding-top: 32px;
+  padding-bottom: 48px;
+}
+
+body.compact-mode .admin-card,
+body.compact-mode .profile-v2-card,
+body.compact-mode .vt-card,
+body.compact-mode .history-card,
+body.compact-mode .advanced-card {
+  padding: 20px;
+}
+
+body.compact-mode .admin-table th,
+body.compact-mode .admin-table td,
+body.compact-mode .history-table th,
+body.compact-mode .history-table td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
 @media (max-width: 768px) {
   #dashboardNavbar .nav-profile-menu {
     align-self: flex-end;
